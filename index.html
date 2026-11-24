@@ -494,15 +494,18 @@ const REAL_EVENTS = [
     fed: "IFBB Pro League", about: "The Arnold Sports Festival returns to the Greater Columbus Convention Center. The official 2027 dates are not announced yet; ticket sellers list March 4–7, 2027.", url: "https://www.arnoldsports.com/", src: "Arnold Sports" },
   { id: "arnolduk27", name: "Arnold Classic UK 2027", date: "Mar 19–21, 2027", place: "NEC, Birmingham, UK", status: "upcoming", img: "cv_arnolduk27", start: new Date(2027, 2, 19, 9, 0, 0),
     fed: "IFBB Pro League", about: "The Arnold Classic UK returns to the NEC in Birmingham for three days.", url: "https://fitnessvolt.com/2027-arnold-classic-uk-march-19‑21-nec-in-birmingham/", src: "Fitness Volt" },
-  { id: "kwpro26", country: "kw", name: "Kuwait Pro 2026", date: "Nov 6–7, 2026", place: "Kuwait City, Kuwait", status: "finished", img: "cv_kwpro26",
+  { id: "kwpro26", country: "kw", name: "Kuwait Pro 2026", date: "Nov 6–7, 2026", place: "Kuwait City, Kuwait", status: "finished", img: "cv_kwpro26", start: new Date(2026, 10, 6, 9, 0, 0),
     fed: "IFBB Pro League", about: "IFBB Pro League show in Kuwait City with Men's Classic Physique and Men's Physique.", url: "https://www.ifbbpro.com/competition/2026-kuwait-pro/", src: "IFBB Pro League",
     res: { classic: [["Levon Poghosyan", "Armenia"], ["Nader Ragheb", "New Zealand"]], physique: [["Michael Van Niekerk", "South Africa"], ["Hashem Alfotewi", "Saudi Arabia"]] } },
-  { id: "olympia26", name: "Mr. Olympia 2026", date: "Sep 24–27, 2026", place: "Las Vegas, USA", status: "finished", img: "cv_olympia26",
+  { id: "olympia26", name: "Mr. Olympia 2026", date: "Sep 24–27, 2026", place: "Las Vegas, USA", status: "finished", img: "cv_olympia26", start: new Date(2026, 8, 24, 9, 0, 0),
     fed: "IFBB Pro League", about: "The biggest show in bodybuilding. Nick Walker won the Mr. Olympia title; Samson Dauda won the finals but finished second overall.", url: "https://fitnessvolt.com/2026-mr-olympia-results/", src: "Fitness Volt",
     res: { open: [["Nick Walker", ""], ["Samson Dauda", ""], ["Derek Lunsford", ""]], classic: [["Niall Darwen", ""]], physique: [["Ryan Terry", ""]], bikini: [["Jasmine Gonzalez", ""]], wellness: [["Eduarda Bezerra", ""]] } }
 ];
 EVENTS.push(...REAL_EVENTS.map((e) => Object.assign({ real: true, reg: false, fee: 0, spots: 0, taken: 0 }, e)));
 const shownEvents = () => EVENTS.filter((e) => !e.hidden);
+// live first, then upcoming (soonest first), finished at the bottom (newest first); your country first inside each group
+const ST_RANK = { live: 0, upcoming: 1, finished: 2 };
+const evSort = (list) => list.slice().sort((a, b) => (ST_RANK[a.status] - ST_RANK[b.status]) || ((b.country === S.country) - (a.country === S.country)) || (a.status === "finished" ? (b.start || 0) - (a.start || 0) : (a.start || 0) - (b.start || 0)));
 
 const CN = { kw: { en: "Kuwait", ar: "الكويت", cur: "Kuwaiti dinar (KD)" }, sa: { en: "Saudi Arabia", ar: "السعودية", cur: "Saudi riyal (SAR)" } };
 const localFirst = (list) => list.slice().sort((a, b) => (b.country === S.country) - (a.country === S.country));
@@ -757,7 +760,7 @@ SCREENS.events = () => `
   <div class="scroll view-in">
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Events</h1></div>
     <div class="seg" role="group" aria-label="Filter events">${[["all", "All"], ["upcoming", "Upcoming"], ["live", "Live"], ["finished", "Finished"]].map(([k, l]) => `<button aria-pressed="${S.filter === k}" data-act="filter" data-v="${k}">${l}</button>`).join("")}</div>
-    <div class="sec">${localFirst(shownEvents()).filter((e) => S.filter === "all" || e.status === S.filter).map((e) => evCard(e, 200)).join("")}</div>
+    <div class="sec">${evSort(shownEvents()).filter((e) => S.filter === "all" || e.status === S.filter).map((e) => evCard(e, 200)).join("")}</div>
   </div>${tabbar("events")}`;
 
 SCREENS.event = (id) => {
