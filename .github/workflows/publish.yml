@@ -1,5 +1,6 @@
 # Publishes the BB365 app on GitHub Pages and keeps its news current.
-# - Every 3 hours the news robot fetches the latest bodybuilding news into news.json.
+# - Every hour the news robot fetches the latest bodybuilding news (news.json) and the events robot
+#   reads the official IFBB Pro League schedule (events.json).
 # - Every change you upload (and every news update) republishes the site.
 # Run it by hand any time: GitHub → Actions → "Publish BB365" → Run workflow.
 name: Publish BB365
@@ -8,7 +9,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,25 +35,25 @@ jobs:
       - name: Fetch the latest bodybuilding news
         run: python scripts/fetch_news.py
 
-      - name: Save the official pro schedule
-        run: python scripts/snapshot_schedule.py
+      - name: Fetch the official pro schedule
+        run: python scripts/fetch_events.py
 
       - name: Save news.json if it changed
         run: |
-          if git diff --quiet -- news.json && [ -z "$(git status --porcelain data)" ]; then
+          if git diff --quiet -- news.json events.json; then
             echo "No news change."
           else
             git config user.name "bb365-news-robot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add news.json data
-            git commit -m "Update news [skip ci]"
+            git add news.json events.json
+            git commit -m "Update news and events [skip ci]"
             git push
           fi
 
       - name: Collect the site files
         run: |
           mkdir _site
-          cp index.html news.json streams.json manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png _site/
+          cp index.html news.json events.json events_manual.json streams.json manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png _site/
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

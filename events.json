@@ -1,0 +1,152 @@
+{
+ "source": "https://www.ifbbpro.com/schedule/",
+ "pageUpdated": "November 23, 2026",
+ "events": [
+  {
+   "id": "ifbbhuanjichinapro202620261129",
+   "name": "Huanji China Pro 2026",
+   "date": "Nov 29, 2026",
+   "place": "Hangzhou, China",
+   "start": "2026-11-29",
+   "end": "2026-11-29",
+   "divs": [
+    "classic",
+    "physique"
+   ],
+   "shows": [
+    "Huanji China Pro 2026",
+    "Huanji China Natural Pro 2026"
+   ],
+   "about": "2 IFBB Pro League shows in Hangzhou, China on the same dates: Huanji China Pro 2026 and Huanji China Natural Pro 2026."
+  },
+  {
+   "id": "ifbbspainpro202620261129",
+   "name": "Spain Pro 2026",
+   "date": "Nov 29, 2026",
+   "place": "Spain",
+   "start": "2026-11-29",
+   "end": "2026-11-29",
+   "divs": [
+    "open"
+   ],
+   "shows": [
+    "Spain Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbtaiwanpro202620261204",
+   "name": "Taiwan Pro 2026",
+   "date": "Dec 4–6, 2026",
+   "place": "Taiwan, China",
+   "start": "2026-12-04",
+   "end": "2026-12-06",
+   "divs": [
+    "212",
+    "classic",
+    "physique"
+   ],
+   "shows": [
+    "Taiwan Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbsaudiarabiapro202620261205",
+   "name": "Saudi Arabia Pro 2026",
+   "date": "Dec 5–6, 2026",
+   "place": "Riyadh, Saudi Arabia",
+   "start": "2026-12-05",
+   "end": "2026-12-06",
+   "divs": [
+    "212",
+    "classic",
+    "physique"
+   ],
+   "shows": [
+    "Saudi Arabia Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbsouthafricapro202620261205",
+   "name": "South Africa Pro 2026",
+   "date": "Dec 5–6, 2026",
+   "place": "South Africa",
+   "start": "2026-12-05",
+   "end": "2026-12-06",
+   "divs": [
+    "wheelchair"
+   ],
+   "shows": [
+    "South Africa Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbaustriapro202620261212",
+   "name": "Austria Pro 2026",
+   "date": "Dec 12, 2026",
+   "place": "Schwechat, Austria",
+   "start": "2026-12-12",
+   "end": "2026-12-12",
+   "divs": [
+    "classic"
+   ],
+   "shows": [
+    "Austria Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbargentinapro202620261213",
+   "name": "Argentina Pro 2026",
+   "date": "Dec 13, 2026",
+   "place": "Argentina",
+   "start": "2026-12-13",
+   "end": "2026-12-13",
+   "divs": [
+    "physique"
+   ],
+   "shows": [
+    "Argentina Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbhuanjichinapro202620261213",
+   "name": "Huanji China Pro 2026 (Beijing)",
+   "date": "Dec 13, 2026",
+   "place": "Beijing, China",
+   "start": "2026-12-13",
+   "end": "2026-12-13",
+   "divs": [
+    "classic",
+    "physique"
+   ],
+   "shows": [
+    "Huanji China Pro 2026"
+   ],
+   "about": "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel."
+  },
+  {
+   "id": "ifbbindiapro202620261218",
+   "name": "India Pro 2026",
+   "date": "Dec 18–20, 2026",
+   "place": "Mumbai, India",
+   "start": "2026-12-18",
+   "end": "2026-12-20",
+   "divs": [
+    "classic",
+    "physique",
+    "wheelchair"
+   ],
+   "shows": [
+    "India Pro 2026",
+    "Bharat India Pro 2026"
+   ],
+   "about": "2 IFBB Pro League shows in Mumbai, India on the same dates: India Pro 2026 and Bharat India Pro 2026."
+  }
+ ],
+ "updated": "2026-11-24T04:06:24Z"
+}

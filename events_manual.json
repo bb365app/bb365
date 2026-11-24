@@ -1,0 +1,9 @@
+{
+ "note": "Hand-checked events that are not on the official IFBB Pro schedule yet. Same id as an event in the app = update it; a new id = add it. Dates as YYYY-MM-DD in start.",
+ "events": [
+  { "id": "arnolduk27", "name": "Arnold Classic UK 2027", "date": "Mar 19–21, 2027", "start": "2027-03-19", "place": "NEC, Birmingham, UK", "status": "upcoming",
+    "about": "The Arnold Classic UK returns to the NEC in Birmingham for three days.", "url": "https://fitnessvolt.com/2027-arnold-classic-uk-march-19‑21-nec-in-birmingham/", "src": "Fitness Volt" },
+  { "id": "arnold27", "name": "Arnold Classic 2027", "date": "Date not announced", "place": "Columbus, Ohio, USA", "status": "upcoming",
+    "about": "The Arnold Classic is held every year in Columbus, Ohio. The 2027 dates have not been announced by the organizers yet.", "url": "https://www.arnoldsports.com/", "src": "Arnold Sports" }
+ ]
+}
