@@ -548,6 +548,8 @@ const S = {
     try { const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; if (tz === "Asia/Riyadh") return "sa"; if (tz === "Asia/Kuwait") return "kw"; } catch (e) {}
     try { const r = (navigator.languages || [navigator.language || ""]).join(" "); if (/-SA\b/i.test(r)) return "sa"; } catch (e) {}
     return "kw"; })(),
+  user: saved.user && typeof saved.user === "object" && saved.user.phone ? saved.user : null, suDone: !!saved.suDone,
+  su: { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} },
   regs: saved.regs || [], follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: {},
   filter: "all", liveCat: "open", evTab: "overview", evCat: "open", shopCat: "supplements", cart: {}, sheet: null,
   alerts: { start: true, results: true }, vote: null, reg: null,
@@ -557,7 +559,7 @@ const S = {
   tickets: saved.tickets || [], lang: saved.lang === "ar" ? "ar" : "en", coach: Object.assign({ goal: "muscle", level: "inter", days: 4, mins: 60, equip: "gym", focus: [], avoid: [] }, saved.coach || {}), coachPlan: saved.coachPlan || null, photos: Array.isArray(saved.photos) ? saved.photos : [], groups: saved.groups || null, picks: saved.picks && typeof saved.picks === "object" ? saved.picks : {}, predOut: !!saved.predOut, seen: saved.seen || {}, tk: null, tkFresh: null, rankDiv: "open",
   orm: { w: "", r: "" }, fat: { neck: "", waist: "", hip: "" }, logIn: { w: "", d: new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10) }, s: { q: "" }
 };
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut })); } catch (e) {} };
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ user: S.user, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut })); } catch (e) {} };
 const spotsTaken = (e) => e.taken + S.regs.filter((r) => r.event === e.id).length;
 const newReg = (eventId) => ({ event: eventId, step: 1, busy: false, pay: "knet", photo: null, errors: {},
   data: { category: "", name: "", dob: "", nat: "Kuwait", phone: "", email: "", height: "", weight: "", club: "Independent", ig: "", rules: false, fit: false } });
@@ -851,6 +853,8 @@ SCREENS.profile = () => {
   return `
   <div class="scroll view-in">
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Profile</h1></div>
+    <div class="sec">${S.user ? `<div class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("user", 20)}</span><div style="flex:1;min-width:0"><b dir="auto">${esc(S.user.name)}</b><div class="muted" style="font-size:12px;margin-top:2px" dir="ltr" data-keep>${esc(S.user.cc + " " + S.user.phone)}</div></div><button class="btn line sm" data-act="signOut">Sign out</button></div>`
+      : `<a href="#signup" class="btn gold block">${ic("user", 18)} Create account</a>`}</div>
     <div class="sec"><div class="card row" style="gap:16px;padding:16px"><div class="avatar-lg" style="width:72px;height:72px">${last && last.photo ? `<img src="${last.photo}" alt="">` : ic("user", 32)}</div><div style="min-width:0"><div style="font-size:18px;font-weight:700" dir="auto">${last ? esc(last.name) : "Guest athlete"}</div><div class="muted" style="font-size:13px">${last ? esc(last.club) + " · Kuwait" : "Register for an event to build your athlete profile"}</div></div></div></div>
     <div class="sec" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${[[S.regs.length, "Entries"], [following.length, "Following"], [pdDone(), "Predictions"]].map(([n, l]) => `<div class="fact" style="align-items:center"><b class="disp" style="font-size:30px;line-height:1">${n}</b><span>${l}</span></div>`).join("")}</div>
 
@@ -2186,7 +2190,7 @@ function applyLang() {
   ph.dir = ar ? "rtl" : "ltr"; ph.lang = ar ? "ar" : "en"; document.documentElement.lang = ar ? "ar" : "en";
 }
 ACT.lang = (v) => { S.lang = v === "en" || v === "ar" ? v : S.lang === "ar" ? "en" : "ar"; applyLang(); persist(); };
-ACT.enter = (v) => { ACT.lang(v); location.hash = "#home"; };
+ACT.enter = (v) => { ACT.lang(v); location.hash = S.suDone ? "#home" : "#signup"; };
 const langBtn = (cls = "ibtn lang-btn") => `<button class="${cls}" data-act="lang" data-keep aria-label="${S.lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}">${S.lang === "ar" ? "EN" : "ع"}</button>`;
 new MutationObserver((muts) => { if (S.lang !== "ar") return; muts.forEach((m) => m.addedNodes.forEach(trTree)); })
   .observe(document.getElementById("phone"), { childList: true, subtree: true });
@@ -2393,6 +2397,69 @@ AR_RX.push(
   [/^from ([\d.,]+) SAR \/ month$/, (m, a) => `من ${a} ر.س شهريًا`],
   [/^Register · ([\d.,]+) SAR$/, (m, a) => `سجّل · ${a} ر.س`]
 );
+
+/* ============ Sign up (demo): the account is kept on this phone only until real accounts are connected ============ */
+const SU_CC = () => (S.country === "sa" ? "+966" : "+965");
+const suPhoneOk = (p) => (S.country === "sa" ? /^5\d{8}$/ : /^[569]\d{7}$/).test(p);
+const suIn = (k, label, attrs) => { const e = S.su.err[k];
+  return `<div class="field"><label for="su-${k}">${label}</label>${k === "phone" ? `<div class="row g8" dir="ltr"><span class="input" data-keep dir="ltr" style="width:78px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--muted)">${SU_CC()}</span><input class="input" id="su-${k}" data-su="${k}" dir="ltr" value="${esc(S.su.f[k])}" ${attrs}${e ? ` aria-invalid="true" aria-describedby="su-e-${k}"` : ""}></div>`
+    : `<input class="input" id="su-${k}" data-su="${k}" value="${esc(S.su.f[k])}" ${attrs}${e ? ` aria-invalid="true" aria-describedby="su-e-${k}"` : ""}>`}${e ? `<div class="err" id="su-e-${k}">${e}</div>` : ""}</div>`; };
+SCREENS.signup = () => {
+  const m = S.su.mode;
+  return `
+  <div class="scroll view-in" style="gap:22px;padding-top:max(24px,env(safe-area-inset-top,0px))">
+    <div class="sec" style="align-items:center;gap:8px;text-align:center"><div class="logo" data-keep style="font-size:44px">BB365</div>
+      <h1 class="title" tabindex="-1" data-focus style="font-size:34px">${m === "in" ? "Welcome back" : "Create your account"}</h1>
+      <p class="muted" style="margin:0;font-size:14px;line-height:1.5;max-width:32ch">${m === "in" ? "Sign in to see your predictions, challenges and tickets." : "Save your predictions, join challenges with friends and keep your tickets in one place."}</p></div>
+    <div class="seg" role="group" aria-label="Account" style="justify-content:center">${[["up", "Sign up"], ["in", "Sign in"]].map(([k, l]) => `<button aria-pressed="${m === k}" data-act="suMode" data-v="${k}">${l}</button>`).join("")}</div>
+    <form class="sec" style="gap:14px" data-suform novalidate>
+      ${m === "up" ? suIn("name", "Full name", 'autocomplete="name" placeholder="Your name"') : ""}
+      ${suIn("phone", "Mobile number", 'type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="' + (S.country === "sa" ? "5XXXXXXXX" : "XXXXXXXX") + '"')}
+      ${m === "up" ? suIn("email", "Email (optional)", 'type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" dir="ltr"') : ""}
+      ${suIn("pass", "Password", `type="password" autocomplete="${m === "in" ? "current-password" : "new-password"}" placeholder="${m === "in" ? "Your password" : "At least 8 characters"}" dir="auto"`)}
+      <button class="btn gold block" type="submit">${m === "in" ? "Sign in" : "Create account"}</button>
+    </form>
+    <div class="sec" style="gap:10px;align-items:center"><button class="btn line block" data-act="suSkip">Skip for now</button>
+      <p class="note" style="padding:0;text-align:center">You can browse news, results and events without an account. For now your account is saved on this phone only.</p></div>
+  </div>`;
+};
+document.addEventListener("input", (ev) => {
+  const k = ev.target.dataset && ev.target.dataset.su; if (!k) return;
+  S.su.f[k] = k === "phone" ? ev.target.value.replace(/\D/g, "").replace(/^(965|966)/, "").replace(/^0/, "") : ev.target.value;
+  if (S.su.err[k]) { delete S.su.err[k]; ev.target.removeAttribute("aria-invalid"); const er = document.getElementById("su-e-" + k); if (er) er.remove(); }
+});
+document.addEventListener("submit", (ev) => {
+  if (!ev.target.matches("[data-suform]")) return; ev.preventDefault();
+  const f = S.su.f, m = S.su.mode, e = {};
+  if (m === "up" && f.name.trim().length < 2) e.name = "Enter your name.";
+  if (!suPhoneOk(f.phone)) e.phone = S.country === "sa" ? "Enter a 9-digit Saudi mobile number that starts with 5." : "Enter an 8-digit Kuwaiti mobile number.";
+  if (m === "up" && f.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = "Enter a valid email, or leave it empty.";
+  if (f.pass.length < 8) e.pass = "Use at least 8 characters.";
+  if (m === "in" && !e.phone && (!S.user || S.user.phone !== f.phone)) e.phone = "No account with this number on this phone. Sign up first.";
+  S.su.err = e;
+  if (Object.keys(e).length) { render(true); const first = document.querySelector('[aria-invalid="true"]'); if (first) first.focus(); return; }
+  if (m === "up") S.user = { name: f.name.trim(), phone: f.phone, cc: SU_CC(), email: f.email.trim() };
+  S.su = { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} }; S.suDone = true; persist(); // the password is checked for length only and never stored
+  toast(m === "in" ? "Signed in" : "Account created"); location.hash = "#home";
+});
+Object.assign(ACT, {
+  suMode: (v) => { S.su.mode = v; S.su.err = {}; },
+  suSkip: () => { S.suDone = true; persist(); location.hash = "#home"; },
+  signOut: () => { S.user = null; S.suDone = false; persist(); toast("Signed out"); location.hash = "#signup"; }
+});
+Object.assign(AR, {
+  "Create your account": "أنشئ حسابك", "Welcome back": "أهلًا بعودتك",
+  "Save your predictions, join challenges with friends and keep your tickets in one place.": "احفظ توقعاتك، ونافس ربعك في التحديات، وخلّ تذاكرك كلها في مكان واحد.",
+  "Sign in to see your predictions, challenges and tickets.": "سجّل دخولك عشان تشوف توقعاتك وتحدياتك وتذاكرك.",
+  "Sign up": "حساب جديد", "Sign in": "تسجيل الدخول", "Full name": "الاسم الكامل", "Your name": "اسمك", "Mobile number": "رقم الجوال",
+  "Email (optional)": "الإيميل (اختياري)", "Password": "كلمة المرور", "At least 8 characters": "8 أحرف على الأقل", "Your password": "كلمة المرور",
+  "Create account": "أنشئ الحساب", "Skip for now": "تخطَّ الآن",
+  "You can browse news, results and events without an account. For now your account is saved on this phone only.": "تقدر تتصفح الأخبار والنتائج والبطولات بدون حساب. حاليًا حسابك ينحفظ على هذا الجوال بس.",
+  "Enter your name.": "اكتب اسمك.", "Enter a 9-digit Saudi mobile number that starts with 5.": "اكتب رقم جوال سعودي من 9 أرقام يبدأ بـ 5.",
+  "Enter an 8-digit Kuwaiti mobile number.": "اكتب رقم جوال كويتي من 8 أرقام.", "Enter a valid email, or leave it empty.": "اكتب إيميل صحيح، أو خله فاضي.",
+  "Use at least 8 characters.": "استخدم 8 أحرف على الأقل.", "No account with this number on this phone. Sign up first.": "ما فيه حساب بهذا الرقم على هذا الجوال. سجّل حساب جديد أول.",
+  "Account created": "تم إنشاء الحساب", "Signed in": "تم تسجيل الدخول", "Signed out": "تم تسجيل الخروج", "Sign out": "تسجيل الخروج", "Account": "الحساب"
+});
 
 render(false);
 </script>
