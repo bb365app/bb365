@@ -1,0 +1,62 @@
+# Publishes the BB365 app on GitHub Pages and keeps its news current.
+# - Every 3 hours the news robot fetches the latest bodybuilding news into news.json.
+# - Every change you upload (and every news update) republishes the site.
+# Run it by hand any time: GitHub → Actions → "Publish BB365" → Run workflow.
+name: Publish BB365
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch the latest bodybuilding news
+        run: python scripts/fetch_news.py
+
+      - name: Save news.json if it changed
+        run: |
+          if git diff --quiet -- news.json; then
+            echo "No news change."
+          else
+            git config user.name "bb365-news-robot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add news.json
+            git commit -m "Update news [skip ci]"
+            git push
+          fi
+
+      - name: Collect the site files
+        run: |
+          mkdir _site
+          cp index.html news.json streams.json manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png _site/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
