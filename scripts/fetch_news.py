@@ -18,20 +18,22 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "news.json"
-MAX_ITEMS = 30
+MAX_ITEMS = 40
 KEEP_DAYS = 14
 
-# name, feed url, only keep bodybuilding stories (for general fitness sites)
+# name, feed url, how to keep only bodybuilding stories:
+#   "cats"  = the title or the site's own categories must mention bodybuilding (bodybuilding-focused sites)
+#   "title" = the title itself must mention bodybuilding (general fitness sites that tag widely)
 FEEDS = [
-    ("Fitness Volt", "https://fitnessvolt.com/feed/", True),
-    ("Generation Iron", "https://generationiron.com/feed/", True),
-    ("Muscle & Fitness", "https://www.muscleandfitness.com/feed/", True),
-    ("BarBend", "https://barbend.com/feed/", True),
+    ("Fitness Volt", "https://fitnessvolt.com/feed/", "cats"),
+    ("Generation Iron", "https://generationiron.com/feed/", "cats"),
+    ("Muscle & Fitness", "https://www.muscleandfitness.com/feed/", "title"),
+    ("BarBend", "https://barbend.com/feed/", "title"),
 ]
 
 BB_WORDS = re.compile(
     r"bodybuild|olympia|ifbb|npc|\bpro\b|physique|classic|bikini|wellness|figure|prep|posing|"
-    r"stage|contest|show|champion|walker|dauda|cbum|bumstead|lunsford|ramy|kuwait|gulf|arab|saudi|dubai|qatar",
+    r"contest|champion|walker|dauda|cbum|bumstead|lunsford|ramy|rambod|cutler|coleman|arnold|kuwait|gulf|arab|saudi|dubai|qatar|bodybuilder",
     re.I,
 )
 ICONS = [
@@ -39,6 +41,11 @@ ICONS = [
     (re.compile(r"diet|nutrition|calorie|protein|meal|carb|dry|water|diuretic", re.I), "flame"),
     (re.compile(r"workout|training|exercise|split|sets|reps|lift|squat|bench|deadlift", re.I), "dumbbell"),
     (re.compile(r"slam|feud|beef|robbed|callout|responds|fires back|controvers|banned", re.I), "bolt"),
+]
+NOT_BB = re.compile(r"powerlift|\bIPF\b|strongman|crossfit|weightlifting|arm ?wrestl", re.I)
+KINDS = [
+    ("result", re.compile(r"\bresults?\b|\bwins?\b|\bwon\b|crowned|scorecard|takes (the )?(title|overall|crown)|champion(s|ship)? (crowned|recap)", re.I)),
+    ("drama", re.compile(r"slams?|fires? back|responds? to|calls? out|robbed|controvers|beef|feud|criticiz|blasts?|claps? back|disqualif|banned|accus|reacts? to|rips?\b", re.I)),
 ]
 NS = {"atom": "http://www.w3.org/2005/Atom", "media": "http://search.yahoo.com/mrss/"}
 
@@ -86,10 +93,13 @@ def read_feed(name, url, only_bb):
         cats = " ".join(clean(c.text) for c in e.findall("category"))
         if not title or not link.startswith("https://") or not when:
             continue
-        if only_bb and not BB_WORDS.search(title + " " + cats):
+        if not BB_WORDS.search(title if only_bb == "title" else title + " " + cats):
+            continue
+        if NOT_BB.search(title) and not re.search(r"bodybuild", title + " " + cats, re.I):
             continue
         icon = next((i for rx, i in ICONS if rx.search(title)), "news")
-        out.append({"t": title[:160], "url": link, "src": name, "date": nice_date(when), "ts": int(when.timestamp()), "ic": icon})
+        kind = next((k for k, rx in KINDS if rx.search(title)), "news")
+        out.append({"t": title[:160], "url": link, "src": name, "date": nice_date(when), "ts": int(when.timestamp()), "ic": icon, "kind": kind})
     return out
 
 
@@ -127,7 +137,7 @@ def main():
         items.append(x)
     items = items[:MAX_ITEMS]
 
-    if [i["url"] for i in items] == [i.get("url") for i in old.get("items", [])]:
+    if items == old.get("items", []):
         print("No new stories.")
         return
     OUT.write_text(json.dumps({"updated": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "items": items}, ensure_ascii=False, indent=1), encoding="utf-8")

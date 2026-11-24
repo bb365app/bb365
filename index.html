@@ -330,6 +330,7 @@ img{display:block}
 .cn-btn[aria-checked=true] span{color:var(--gold-2)}
 .sp-ph{height:34%}.sp-t{font-size:76px}
 @media (max-height:720px){.sp-ph{height:22%}.sp-t{font-size:56px}.lg-btn{min-height:68px!important}.cn-btn{min-height:52px}}
+button.link{background:none;border:0;padding:0}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
@@ -643,6 +644,7 @@ const champsCard = () => `<div class="res"><div class="res-h"><span class="res-i
 const dramaCard = (x) => `<div class="drama"><div class="row" style="justify-content:space-between;gap:10px"><span class="chip live">${ic("flame", 12, 2)} ${esc(x.tag)}</span><span class="muted" style="font-size:12px">${esc(x.date)}</span></div>
   <div class="vs"><b class="n">${esc(x.a)}</b><i>VS</i><b class="n">${esc(x.b)}</b></div>
   <div><b style="font-size:16px;line-height:1.3">${esc(x.t)}</b><p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:#D8D8DE">${esc(x.d)}</p></div>${xl(x.url, x.src)}</div>`;
+const autoCard = (icn) => (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="res" style="flex-direction:row;align-items:center;gap:12px"><span class="res-ic">${ic(icn, 22)}</span><div style="flex:1;min-width:0"><b dir="auto" data-keep style="display:block;font-size:15px;line-height:1.3">${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="muted" style="font-size:12px;margin-top:4px"><span data-keep>${esc(n.src)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
 const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><span data-keep>${esc(n.src || FV)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
 
 SCREENS.home = () => {
@@ -654,18 +656,10 @@ SCREENS.home = () => {
 
     <div class="seg" role="group" aria-label="Filter the feed">${[["all", "All"], ["results", "Results"], ["drama", "Drama"], ["news", "News"]].map(([k, l]) => `<button aria-pressed="${f === k}" data-act="feed" data-v="${k}">${l}</button>`).join("")}</div>
 
-    ${on("results") ? topStory() : ""}
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Live now</h2><a href="#event-gulfpro" class="link">Full results</a></div>
-      <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:14px;border-color:#4A3C16">
-        <a href="#event-gulfpro" class="row" style="gap:12px"><img src="${IMG.ev3}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(EVENTS[2].name)}</b><div class="muted" style="font-size:12px;margin-top:2px">Day 2 · ${esc(EVENTS[2].place)}</div></div><span class="chip live"><i class="dot"></i>Live</span></a>
-        ${liveBoard()}
-        <div class="two"><a href="#event-gulfpro" class="btn line">${ic("flame", 18)} Watch live</a><a href="#predict" class="btn gold">${ic("trophy", 18)} Predict</a></div>
-        <p class="note" style="padding:0">Sample live results for the demo.</p>
-      </div></div>` : ""}
+    ${on("results") && !AUTO.res.length ? topStory() : ""}
+    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
 
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
-
-    ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${DRAMA.map(dramaCard).join("")}</div>` : ""}
+    ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
     ${on("news") ? `<div class="sec" style="gap:10px"><div class="sec-h"><h2>Latest news</h2>${f === "all" && NEWS.length > 5 ? `<button class="link" data-act="feed" data-v="news">See all</button>` : ""}</div>${NEWS.slice(0, f === "all" ? 5 : 30).map(newsRow).join("")}${NEWS_AUTO.on ? `<p class="note" style="padding:0">${tx("News updates automatically every 3 hours.", "الأخبار تتحدّث تلقائيًا كل 3 ساعات.")}</p>` : ""}</div>` : ""}
 
@@ -677,7 +671,7 @@ SCREENS.home = () => {
       ${[["#register-" + e.id, "list", "Register"], ["#tickets-" + e.id, "ticket", "Tickets"], ["#rankings", "trophy", "Rankings"], ["#event-gulfpro", "flame", "Live"]].map(([h, i, l]) => `<a href="${h}" class="tile"><span class="ico">${ic(i)}</span>${l}</a>`).join("")}
     </div>
 ` : ""}
-    <p class="note" style="padding:0 20px">Headlines open their original source. The live board and BB365 events are sample data.</p>
+    <p class="note" style="padding:0 20px">Headlines open their original source. BB365 events are sample data.</p>
   </div>${tabbar("home")}`;
 };
 
@@ -1887,6 +1881,7 @@ const AR = {
   "Joseph Baena finishes top 5 in Classic Physique at his pro natural debut": "Joseph Baena ضمن أفضل 5 في الكلاسيك فيزيك بأول مشاركة احترافية له في بطولات الطبيعيين",
   "Jay Cutler on getting dry conditioning without diuretics": "Jay Cutler: كيف تصل لتنشيف جاف بدون مدرات البول",
   "BB365 events": "بطولات BB365", "Registration open": "التسجيل مفتوح", "Register": "سجّل", "Tickets": "التذاكر", "Rankings": "التصنيف",
+  "Headlines open their original source. BB365 events are sample data.": "العناوين تفتح مصدرها الأصلي. بطولات BB365 بيانات تجريبية.",
   "Headlines open their original source. The live board and BB365 events are sample data.": "العناوين تفتح مصدرها الأصلي. لوحة النتائج المباشرة وبطولات BB365 بيانات تجريبية.",
   // places & countries
   "Las Vegas": "لاس فيغاس", "Bucharest": "بوخارست", "Kuwait City": "مدينة الكويت", "Kuwait": "الكويت", "Kuwait City, Kuwait": "مدينة الكويت، الكويت",
@@ -2329,16 +2324,18 @@ AR_RX.push([/^Weight from ([\d.]+) kg to ([\d.]+) kg across (\d+) entries$/, (m,
 
 /* ============ Automatic news: when the app is hosted, news.json (written by the news robot) replaces the built-in headlines ============ */
 const NEWS_AUTO = { on: false };
+const AUTO = { res: [], drama: [] }; // real results and drama headlines from news.json
 (async () => {
   if (!/^https?:$/.test(location.protocol)) return;
   try {
     const r = await fetch("news.json", { cache: "no-cache" });
     if (!r.ok) return;
     const j = await r.json();
-    const items = (Array.isArray(j.items) ? j.items : []).filter((x) => x && typeof x.t === "string" && /^https:\/\//.test(x.url || "")).slice(0, 30);
+    const items = (Array.isArray(j.items) ? j.items : []).filter((x) => x && typeof x.t === "string" && /^https:\/\//.test(x.url || "")).slice(0, 40);
     if (!items.length) return;
-    NEWS.length = 0;
-    items.forEach((x) => NEWS.push({ t: x.t, ar: typeof x.ar === "string" ? x.ar : "", url: x.url, src: String(x.src || ""), date: String(x.date || ""), ic: String(x.ic || "news"), local: !!x.local }));
+    NEWS.length = 0; AUTO.res.length = 0; AUTO.drama.length = 0;
+    items.forEach((x) => { const o = { t: x.t, ar: typeof x.ar === "string" ? x.ar : "", url: x.url, src: String(x.src || ""), date: String(x.date || ""), ic: String(x.ic || "news"), local: !!x.local };
+      (x.kind === "result" ? AUTO.res : x.kind === "drama" ? AUTO.drama : NEWS).push(o); });
     NEWS_AUTO.on = true;
     if (route()[0] === "home") render(true);
   } catch (e) {}
