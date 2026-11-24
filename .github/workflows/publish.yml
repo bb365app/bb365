@@ -24,9 +24,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,8 +52,16 @@ jobs:
           cp index.html news.json streams.json manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png _site/
 
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
