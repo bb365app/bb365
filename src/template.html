@@ -749,7 +749,7 @@ SCREENS.home = () => {
 
     ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
-    ${on("news") ? `<div class="sec" style="gap:10px"><div class="sec-h"><h2>Latest news</h2>${f === "all" && NEWS.length > 5 ? `<button class="link" data-act="feed" data-v="news">See all</button>` : ""}</div>${NEWS.slice(0, f === "all" ? 5 : 30).map(newsRow).join("")}${NEWS_AUTO.on ? `<p class="note" style="padding:0">${tx("News updates automatically every 3 hours.", "الأخبار تتحدّث تلقائيًا كل 3 ساعات.")}</p>` : ""}</div>` : ""}
+    ${on("news") ? `<div class="sec" style="gap:10px"><div class="sec-h"><h2>Latest news</h2>${f === "all" && NEWS.length > 5 ? `<button class="link" data-act="feed" data-v="news">See all</button>` : ""}</div>${NEWS.slice(0, f === "all" ? 5 : 30).map(newsRow).join("")}${NEWS_AUTO.on ? `<p class="note" style="padding:0">${tx("News updates automatically every hour.", "الأخبار تتحدّث تلقائيًا كل ساعة.")}</p>` : ""}</div>` : ""}
 
     ${f === "all" ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Compete and train</h2></div><div class="train">${[["#predict", "trophy", "Predictions", "Pick the winners"], ["#groups", "users", "Challenges", "Compete with friends"], ["#coach", "bolt", "Smart coach", "A plan built for you"]].map(([h, i, t, d]) => `<a href="${h}" class="tcard"><span class="ico">${ic(i, 22)}</span><b>${t}</b><span class="muted">${d}</span></a>`).join("")}</div></div>` : ""}
 
@@ -1893,7 +1893,7 @@ SCREENS.predict = () => {
   let body;
   if (st === "open") {
     const left = 3 - pick.length;
-    body = `<p class="pd-hint">${left === 3 ? "Tap 3 athletes in the order you think they will finish." : left ? left + " more to pick." : "Your picks are saved. You can change them until " + pdLock(c) + "."}</p>
+    body = `<p class="pd-hint">${left === 3 ? "Tap 3 athletes in the order you think they will finish." : left ? left + " more to pick." : (pdLock(c) ? "Your picks are saved. You can change them until " + pdLock(c) + "." : "Your picks are saved.")}</p>
       <div class="pd-slots" role="group" aria-label="Your top 3">${[0, 1, 2].map((i) => `<div class="pd-slot${pick[i] ? " f" : ""}"><span>${ORD[i]}</span><b>${pick[i] ? esc(pick[i]) : "–"}</b></div>`).join("")}</div>
       <div class="pd-list">${P.list.map(([n, cc]) => { const i = pick.indexOf(n); const rank = RANKS[c].findIndex((r) => r[0] === n) + 1; return `<button class="pd-row" aria-pressed="${i >= 0}" data-act="pick" data-v="${c}|${esc(n)}"><span class="pd-n">${i >= 0 ? i + 1 : ""}</span><span style="flex:1;min-width:0"><b style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">${cc}${rank ? " · No. " + rank : ""}</span></span></button>`; }).join("")}</div>
       ${pick.length ? `<button class="btn line sm" style="align-self:flex-start" data-act="predClear" data-v="${c}">${ic("refresh", 16)} Clear picks</button>` : ""}`;
@@ -1915,7 +1915,7 @@ SCREENS.predict = () => {
     </div></div>
     <div class="sec"><div class="sec-h"><h2>Practice round</h2><span class="chip">Sample athletes</span></div></div>
     <div class="seg" role="group" aria-label="Division">${PD_ORDER.map((k) => `<button aria-pressed="${c === k}" data-act="predCat" data-v="${k}">${CATS.find((x) => x.id === k).name}</button>`).join("")}</div>
-    <div class="sec" style="gap:12px"><div class="row g8" style="flex-wrap:wrap"><b class="disp" style="font-size:22px;text-transform:uppercase;letter-spacing:.03em">${cn}</b>${chip}${st === "open" ? `<span class="muted" style="font-size:12px">Picks lock at ${pdLock(c)}</span>` : ""}</div>${body}</div>
+    <div class="sec" style="gap:12px"><div class="row g8" style="flex-wrap:wrap"><b class="disp" style="font-size:22px;text-transform:uppercase;letter-spacing:.03em">${cn}</b>${chip}${st === "open" && pdLock(c) ? `<span class="muted" style="font-size:12px">Picks lock at ${pdLock(c)}</span>` : ""}</div>${body}</div>
     <div class="sec"><div class="card form" style="gap:12px"><b style="font-size:16px">Try the demo</b><p style="margin:0;font-size:14px;line-height:1.5;color:#D8D8DE">${S.predOut ? "Sample results are in. Open each division to see your points." : "Bring in sample results to see how points and ranking work."}</p>
       ${S.predOut ? `<button class="btn line block" data-act="predReset">${ic("refresh", 18)} Start over</button>` : `<button class="btn gold block" data-act="predReveal">${ic("flame", 18)} Show sample results</button>`}</div></div>
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>Leaderboard</h2><span class="muted" style="font-size:12px">You are ${ordEn(rk)} of ${of}</span></div>
@@ -2374,7 +2374,7 @@ Object.assign(AR, {
   "Show sample results": "اعرض نتائج تجريبية", "Start over": "ابدأ من جديد", "Make your picks first.": "اختر توقعاتك أولًا.", "Sample results are in": "ظهرت النتائج التجريبية",
   "Coming up": "قريبًا", "Predictions open when the start list is published.": "تفتح التوقعات عند نشر قائمة المشاركين.",
   "Demo: athletes, results and friends are sample data. Real predictions need accounts and a server.": "تجريبي: اللاعبون والنتائج والأصدقاء بيانات تجريبية. التوقعات الحقيقية تحتاج حسابات وسيرفر.",
-  "My predictions": "توقعاتي", "My plan": "خطتي", "Plan saved": "تم حفظ الخطة", "Change my plan": "غيّر خطتي", "Back to coach": "رجوع للمدرب",
+  "My predictions": "توقعاتي", "My plan": "خطتي", "Plan saved": "تم حفظ الخطة", "Your picks are saved.": "تم حفظ توقعاتك.", "Change my plan": "غيّر خطتي", "Back to coach": "رجوع للمدرب",
   "Use this in the Nutrition calculator": "استخدمها في حاسبة التغذية", "Added to Nutrition calculator": "أُضيفت إلى حاسبة التغذية"
 });
 const arPts = (n) => (n >= 3 && n <= 10 ? "نقاط" : "نقطة");
@@ -2414,13 +2414,14 @@ const AUTO = { res: [], drama: [] }; // real results and drama headlines from ne
 (async () => {
   if (!/^https?:$/.test(location.protocol)) return;
   try {
-    const r = await fetch("news.json", { cache: "no-cache" });
+    const [r, ra] = await Promise.all([fetch("news.json", { cache: "no-cache" }), fetch("news_ar.json", { cache: "no-cache" }).catch(() => null)]);
     if (!r.ok) return;
     const j = await r.json();
+    let tr = {}; try { if (ra && ra.ok) { const k = await ra.json(); if (k && typeof k.titles === "object") tr = k.titles; } } catch (e) {}
     const items = (Array.isArray(j.items) ? j.items : []).filter((x) => x && typeof x.t === "string" && /^https:\/\//.test(x.url || "")).slice(0, 40);
     if (!items.length) return;
     NEWS.length = 0; AUTO.res.length = 0; AUTO.drama.length = 0;
-    items.forEach((x) => { const o = { t: x.t, ar: typeof x.ar === "string" ? x.ar : "", url: x.url, src: String(x.src || ""), date: String(x.date || ""), ic: String(x.ic || "news"), local: !!x.local };
+    items.forEach((x) => { const o = { t: x.t, ar: typeof x.ar === "string" ? x.ar : typeof tr[x.url] === "string" ? tr[x.url] : "", url: x.url, src: String(x.src || ""), date: String(x.date || ""), ic: String(x.ic || "news"), local: !!x.local };
       (x.kind === "result" ? AUTO.res : x.kind === "drama" ? AUTO.drama : NEWS).push(o); });
     NEWS_AUTO.on = true;
     if (route()[0] === "home") render(true);
@@ -2631,7 +2632,7 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
 AR_RX.push([/^(.+) Pro (\d{4})$/, (m, a, y) => (AR[a] ? `${AR[a]} برو ${y}` : m)]);
-Object.assign(AR, { "Taiwan, China": "تايوان، الصين", "Beijing": "بكين", "Hangzhou": "هانغتشو", "Mumbai": "مومباي", "Huanji China Natural Pro 2026": "هوانجي الصين ناتشورال برو 2026", "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel. Masters classes only.": "بطولة IFBB Pro League لفئة الماسترز فقط. الفئات والمواعيد من جدول المحترفين الرسمي وممكن تتغير.",
+Object.assign(AR, { "Taiwan, China": "تايوان، الصين", "Entry fee ·": "رسوم المشاركة", "Beijing": "بكين", "Hangzhou": "هانغتشو", "Mumbai": "مومباي", "Huanji China Natural Pro 2026": "هوانجي الصين ناتشورال برو 2026", "IFBB Pro League show. Divisions and dates are from the official pro schedule and can change; check the official page before you travel. Masters classes only.": "بطولة IFBB Pro League لفئة الماسترز فقط. الفئات والمواعيد من جدول المحترفين الرسمي وممكن تتغير.",
   "Spain": "إسبانيا", "Taiwan": "تايوان", "Austria": "النمسا", "Argentina": "الأرجنتين", "India": "الهند", "Brazil": "البرازيل", "Mexico": "المكسيك", "Canada": "كندا", "Japan": "اليابان", "Korea": "كوريا", "Poland": "بولندا", "Italy": "إيطاليا", "Germany": "ألمانيا", "Portugal": "البرتغال", "Romania": "رومانيا", "Russia": "روسيا", "Dubai": "دبي", "Oman": "عُمان", "Bahrain": "البحرين", "Qatar": "قطر", "Egypt": "مصر", "Jordan": "الأردن", "Iraq": "العراق" });
 
 render(false);

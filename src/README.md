@@ -13,6 +13,7 @@ python3 src/make_site.py /tmp/bb365_page.html index.html
 
 Data the robots and the weekly check keep up to date (no rebuild needed):
 - `news.json`: news robot, every hour.
+- `news_ar.json`: Arabic headlines for news.json (by story link), filled by the translation check.
 - `events.json`: events robot, from the official IFBB Pro League schedule, every hour.
 - `events_manual.json`: hand-checked events not on that schedule yet (for example the Arnold Classic).
 - `streams.json`: live stream links per event id.
