@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24T02:17:21Z",
+ "updated": "2026-11-24T02:30:44Z",
  "items": [
   {
    "t": "300-Lb Urs Kalecinski Reveals 2027 Contest Plans, Smashes Back Training With Dorian Yates",
@@ -7,7 +7,8 @@
    "src": "Fitness Volt",
    "date": "Nov 23, 2026",
    "ts": 1795459001,
-   "ic": "dumbbell"
+   "ic": "dumbbell",
+   "kind": "news"
   },
   {
    "t": "Nick Walker Details His High-Carb Full Day of Eating 14.5 Weeks Out from the 2027 Arnold Classic",
@@ -15,15 +16,8 @@
    "src": "Fitness Volt",
    "date": "Nov 23, 2026",
    "ts": 1795452298,
-   "ic": "flame"
-  },
-  {
-   "t": "2026 Sheffield V Powerlifting Championships Results & Records Breakdown",
-   "url": "https://fitnessvolt.com/2026-sheffield-v-powerlifting-championships-results/",
-   "src": "Fitness Volt",
-   "date": "Nov 23, 2026",
-   "ts": 1795448064,
-   "ic": "trophy"
+   "ic": "flame",
+   "kind": "news"
   },
   {
    "t": "When Was Ronnie Coleman’s Best Year? ‘TMP’ Picks The Bodybuilding Icon’s Greatest Stage Look",
@@ -31,7 +25,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 23, 2026",
    "ts": 1795433415,
-   "ic": "news"
+   "ic": "news",
+   "kind": "news"
   },
   {
    "t": "2026 Amateur Olympia Las Vegas Results",
@@ -39,7 +34,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 23, 2026",
    "ts": 1795433004,
-   "ic": "trophy"
+   "ic": "trophy",
+   "kind": "result"
   },
   {
    "t": "2026 Spanish Grand Prix Pro Results: Tomislav Strmecki Wins Classic Physique",
@@ -47,39 +43,8 @@
    "src": "Fitness Volt",
    "date": "Nov 23, 2026",
    "ts": 1795405376,
-   "ic": "trophy"
-  },
-  {
-   "t": "Austin Perkins (U74KG) Sweeps All Four IPF World Records to Win 2026 Sheffield V Powerlifting Championships",
-   "url": "https://fitnessvolt.com/austin-perkins-four-ipf-world-records-2026-sheffield-v-powerlifting-championships/",
-   "src": "Fitness Volt",
-   "date": "Nov 23, 2026",
-   "ts": 1795393140,
-   "ic": "trophy"
-  },
-  {
-   "t": "Brittany Schlater (+84KG) Sets Deadlift & Total IPF World Records to Win 2026 Sheffield V Powerlifting Championships",
-   "url": "https://fitnessvolt.com/brittany-schlater-deadlift-total-ipf-world-records-win-2026-sheffield-v-powerlifting-championships/",
-   "src": "Fitness Volt",
-   "date": "Nov 22, 2026",
-   "ts": 1795375997,
-   "ic": "trophy"
-  },
-  {
-   "t": "Sonita Muluh (+84KG) Sets 330.5-kg (728.6-lb) Raw Squat IPF World Record at 2026 Sheffield V Powerlifting Championships",
-   "url": "https://fitnessvolt.com/sonita-muluh-raw-squat-ipf-world-record-2026-sheffield-v-powerlifting-championships/",
-   "src": "Fitness Volt",
-   "date": "Nov 22, 2026",
-   "ts": 1795363092,
-   "ic": "trophy"
-  },
-  {
-   "t": "Jesus Olivares (+120KG) Smokes Three IPF World Records at 2026 Sheffield V Powerlifting Championships",
-   "url": "https://fitnessvolt.com/jesus-olivares-three-ipf-world-records-2026-sheffield-v-powerlifting-championships/",
-   "src": "Fitness Volt",
-   "date": "Nov 22, 2026",
-   "ts": 1795357586,
-   "ic": "trophy"
+   "ic": "trophy",
+   "kind": "result"
   },
   {
    "t": "2026 Atlantic Coast Pro Results: Dylan Dawson Wins Classic Physique",
@@ -87,7 +52,8 @@
    "src": "Fitness Volt",
    "date": "Nov 22, 2026",
    "ts": 1795325661,
-   "ic": "trophy"
+   "ic": "trophy",
+   "kind": "result"
   },
   {
    "t": "Andrew Jacked Shares His Back-Building Training Ahead of the Arnold Classic",
@@ -95,7 +61,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 20, 2026",
    "ts": 1795175627,
-   "ic": "dumbbell"
+   "ic": "dumbbell",
+   "kind": "news"
   },
   {
    "t": "Hany Rambod Shares His Top Rule For Building Wider Shoulders",
@@ -103,15 +70,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 20, 2026",
    "ts": 1795175219,
-   "ic": "news"
-  },
-  {
-   "t": "Ryan ‘Koup’ Kuperus Shares How the Reason Outdoors is Saving Lives and Building a Community",
-   "url": "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/ryan-koup-kuperus-shares-how-the-reason-outdoors-is-saving-lives-and-building-a-community/",
-   "src": "Muscle & Fitness",
-   "date": "Nov 20, 2026",
-   "ts": 1795174286,
-   "ic": "news"
+   "ic": "news",
+   "kind": "news"
   },
   {
    "t": "Nick Walker Shares His Pre-Arnold Classic Upper-Body Workout",
@@ -119,31 +79,17 @@
    "src": "Muscle & Fitness",
    "date": "Nov 19, 2026",
    "ts": 1795087318,
-   "ic": "dumbbell"
+   "ic": "dumbbell",
+   "kind": "news"
   },
   {
-   "t": "Second Air Force National Signing Day Held at U.S. Capitol",
-   "url": "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/second-air-force-national-signing-day-held-at-u-s-capitol/",
+   "t": "How Reverse-Grip Lat Pulldowns Helped Jay Cutler Build an Even Wider Back",
+   "url": "https://www.muscleandfitness.com/flexonline/training/how-reverse-grip-lat-pulldowns-helped-jay-cutler-build-an-even-wider-back/",
    "src": "Muscle & Fitness",
-   "date": "Nov 18, 2026",
-   "ts": 1795006221,
-   "ic": "news"
-  },
-  {
-   "t": "How Rucking Helped ‘Outlander’ Star Sam Retford Become Battle Ready",
-   "url": "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/how-rucking-helped-outlander-star-sam-retford-become-battle-ready/",
-   "src": "Muscle & Fitness",
-   "date": "Nov 17, 2026",
-   "ts": 1794919343,
-   "ic": "news"
-  },
-  {
-   "t": "Scott Eastwood Is Still Seeking a Rush, Just at a Slower Pace",
-   "url": "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/scott-eastwood-is-still-seeking-a-rush-just-at-a-slower-pace/",
-   "src": "Muscle & Fitness",
-   "date": "Nov 16, 2026",
-   "ts": 1794836954,
-   "ic": "news"
+   "date": "Nov 19, 2026",
+   "ts": 1795086901,
+   "ic": "news",
+   "kind": "drama"
   },
   {
    "t": "Joe Baena Gave Fans a Glimpse of His Bodybuilding Debut",
@@ -151,7 +97,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 16, 2026",
    "ts": 1794833482,
-   "ic": "news"
+   "ic": "news",
+   "kind": "news"
   },
   {
    "t": "Terrence Ruffin Reveals His Strategy to Become 2027 Olympia Champion",
@@ -159,15 +106,8 @@
    "src": "Muscle & Fitness",
    "date": "Nov 16, 2026",
    "ts": 1794833137,
-   "ic": "trophy"
-  },
-  {
-   "t": "At 43, Robert Strauss Continues Training to Be the ‘Dad Bod Destroyer’",
-   "url": "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/at-43-robert-strauss-continues-training-to-be-the-dad-bod-destroyer/",
-   "src": "Muscle & Fitness",
-   "date": "Nov 13, 2026",
-   "ts": 1794549704,
-   "ic": "dumbbell"
+   "ic": "trophy",
+   "kind": "news"
   }
  ]
 }
