@@ -328,8 +328,8 @@ img{display:block}
 .cn-btn b{font-size:16px}.cn-btn span{font-size:12px;color:var(--muted)}
 .cn-btn[aria-checked=true]{border-color:var(--gold);background:rgba(214,176,76,.14)}
 .cn-btn[aria-checked=true] span{color:var(--gold-2)}
-.sp-ph{height:46%}.sp-t{font-size:76px}
-@media (max-height:720px){.sp-ph{height:38%}.sp-t{font-size:56px}.lg-btn{min-height:68px!important}.cn-btn{min-height:52px}}
+.sp-ph{}.sp-t{font-size:76px}
+@media (max-height:720px){.sp-ph{}.sp-t{font-size:56px}.lg-btn{min-height:68px!important}.cn-btn{min-height:52px}}
 button.link{background:none;border:0;padding:0}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -590,14 +590,13 @@ const placeColor = (p) => medalColor(p === "1st" ? 0 : p === "2nd" ? 1 : 2);
 const SCREENS = {};
 
 SCREENS.splash = () => `
-  <div style="position:relative;flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 28%,#2D2511 0%,#09090A 62%)">
-    <div class="sp-ph" style="position:relative;flex:none;-webkit-mask-image:linear-gradient(180deg,#000 62%,transparent 100%);mask-image:linear-gradient(180deg,#000 62%,transparent 100%)">
-      <img src="${IMG.splash}" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center 60%">
+  <div style="position:relative;flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;background:#060607">
+    <div class="sp-ph" style="position:relative;flex:1;min-height:0;-webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 70%,transparent 100%);mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 70%,transparent 100%)">
+      <img src="${IMG.splash}" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center center">
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:0 28px;min-height:0">
+    <div style="flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:0 28px 28px">
       <h1 class="disp sp-t vh" style="font-weight:800;font-style:italic;line-height:1;letter-spacing:.02em;background:linear-gradient(180deg,#F6E08A,#B8902B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">BB365</h1>
       <div style="font-size:13px;letter-spacing:.5em;color:#C9C9D1;font-weight:500">BODYBUILDING 365</div>
-      <div style="font-size:12px;letter-spacing:.25em;color:var(--gold);font-weight:600">LIVE · COMPETE · FOLLOW</div>
     </div>
     <div class="lang-gate" data-keep role="group" aria-label="Choose your language · اختر اللغة">
       <div class="lg-q"><span lang="ar" dir="rtl">اختر اللغة</span><i></i><span>Choose your language</span></div>
