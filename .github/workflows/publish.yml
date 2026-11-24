@@ -34,14 +34,17 @@ jobs:
       - name: Fetch the latest bodybuilding news
         run: python scripts/fetch_news.py
 
+      - name: Save the official pro schedule
+        run: python scripts/snapshot_schedule.py
+
       - name: Save news.json if it changed
         run: |
-          if git diff --quiet -- news.json; then
+          if git diff --quiet -- news.json && [ -z "$(git status --porcelain data)" ]; then
             echo "No news change."
           else
             git config user.name "bb365-news-robot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add news.json
+            git add news.json data
             git commit -m "Update news [skip ci]"
             git push
           fi
