@@ -3,6 +3,7 @@ import urllib.request
 from pathlib import Path
 out = Path(__file__).resolve().parent.parent / "data" / "ifbbpro_schedule.html"
 req = urllib.request.Request("https://www.ifbbpro.com/schedule/", headers={"User-Agent": "Mozilla/5.0 (BB365 events robot)"})
+out.parent.mkdir(exist_ok=True)
 try:
     out.write_bytes(urllib.request.urlopen(req, timeout=30).read())
     print("saved", out.stat().st_size, "bytes")
