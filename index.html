@@ -496,7 +496,9 @@ const REAL_EVENTS = [
     fed: "IFBB Pro League", about: "The Arnold Classic UK returns to the NEC in Birmingham for three days.", url: "https://fitnessvolt.com/2027-arnold-classic-uk-march-19‑21-nec-in-birmingham/", src: "Fitness Volt" },
   { id: "kwpro26", country: "kw", name: "Kuwait Pro 2026", date: "Nov 6–7, 2026", place: "Kuwait City, Kuwait", status: "finished", img: "cv_kwpro26", start: new Date(2026, 10, 6, 9, 0, 0),
     fed: "IFBB Pro League", about: "IFBB Pro League show in Kuwait City with Men's Classic Physique and Men's Physique.", url: "https://www.ifbbpro.com/competition/2026-kuwait-pro/", src: "IFBB Pro League",
-    res: { classic: [["Levon Poghosyan", "Armenia"], ["Nader Ragheb", "New Zealand"]], physique: [["Michael Van Niekerk", "South Africa"], ["Hashem Alfotewi", "Saudi Arabia"]] } },
+    res: { classic: [["Levon Poghosyan", "Armenia"], ["Nader Ragheb", "New Zealand"], ["Abdallah Almatar", "Kuwait"], ["Hadif Alsuwaidi", "UAE"], ["Abdul-Aziz Al-Murshedi", "Kuwait"], ["Juma Al Shuaibi", "Oman"], ["Ali Albaghli", "Kuwait"], ["Jenev Varghese", "UAE"], ["Mubarak Mubarak", "Kuwait"], ["Ahmed Mohamed", ""], ["Edgard John-Augustin", "France"], ["Kent Nasarondo", "Philippines"], ["Bader Al Antaif", "Saudi Arabia"], ["Jan-Renz Tagal", "Philippines"]],
+      physique: [["Michael Van Niekerk", "South Africa"], ["Hashem Alfotewi", "Saudi Arabia"], ["Qaiser Al-Asi", "Bahrain"], ["Ozcan Kirant", "Turkey"], ["Mahmood Al-Maghrabi", "Bahrain"], ["Ibrahim Cheikh Ousmane", "Saudi Arabia"], ["Sanad Alsanad", "Kuwait"], ["Hamed Abdalla", "Libya"], ["Abdullah Al Salem", "Kuwait"], ["Bader Alsabri", "Kuwait"], ["Mohammed Haidar", "UAE"], ["Husain Manowchehri", "Bahrain"], ["Yousef Alfailakawi", "Kuwait"], ["Ahmad Alshammari", "Kuwait"], ["Mohammad Alrughaib", "Kuwait"]] },
+    resNote: { physique: "14 more athletes tied for 16th place." }, resSrc: "https://fitnessvolt.com/2026-kuwait-pro-results/" },
   { id: "olympia26", name: "Mr. Olympia 2026", date: "Sep 24–27, 2026", place: "Las Vegas, USA", status: "finished", img: "cv_olympia26", start: new Date(2026, 8, 24, 9, 0, 0),
     fed: "IFBB Pro League", about: "The biggest show in bodybuilding. Nick Walker won the Mr. Olympia title; Samson Dauda won the finals but finished second overall.", url: "https://fitnessvolt.com/2026-mr-olympia-results/", src: "Fitness Volt",
     res: { open: [["Nick Walker", ""], ["Samson Dauda", ""], ["Derek Lunsford", ""]], classic: [["Niall Darwen", ""]], physique: [["Ryan Terry", ""]], bikini: [["Jasmine Gonzalez", ""]], wellness: [["Eduarda Bezerra", ""]] } }
@@ -729,6 +731,9 @@ const champsCard = () => `<div class="res"><div class="res-h"><span class="res-i
 const dramaCard = (x) => `<div class="drama"><div class="row" style="justify-content:space-between;gap:10px"><span class="chip live">${ic("flame", 12, 2)} ${esc(x.tag)}</span><span class="muted" style="font-size:12px">${esc(x.date)}</span></div>
   <div class="vs"><b class="n">${esc(x.a)}</b><i>VS</i><b class="n">${esc(x.b)}</b></div>
   <div><b style="font-size:16px;line-height:1.3">${esc(x.t)}</b><p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:#D8D8DE">${esc(x.d)}</p></div>${xl(x.url, x.src)}</div>`;
+const kwProCard = () => { const e = EV("kwpro26"); if (!e) return "";
+  return `<a href="#event-kwpro26" class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></div><span class="chip gold">Kuwait</span></div>
+  ${[["Classic Physique", e.res.classic[0][0] + " · " + e.res.classic[0][1]], ["Men's Physique", e.res.physique[0][0] + " · " + e.res.physique[0][1]], ["Top Kuwaiti", e.res.classic[2][0] + " · 3rd"]].map(([d, w]) => `<div class="win"><span class="muted">${d}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}</a>`; };
 const autoCard = (icn) => (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="res" style="flex-direction:row;align-items:center;gap:12px"><span class="res-ic">${ic(icn, 22)}</span><div style="flex:1;min-width:0"><b dir="auto" data-keep style="display:block;font-size:15px;line-height:1.3">${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="muted" style="font-size:12px;margin-top:4px"><span data-keep>${esc(n.src)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
 const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><span data-keep>${esc(n.src || FV)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
 
@@ -742,7 +747,7 @@ SCREENS.home = () => {
     <div class="seg" role="group" aria-label="Filter the feed">${[["all", "All"], ["results", "Results"], ["drama", "Drama"], ["news", "News"]].map(([k, l]) => `<button aria-pressed="${f === k}" data-act="feed" data-v="${k}">${l}</button>`).join("")}</div>
 
     ${on("results") && !AUTO.res.length ? topStory() : ""}
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
+    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${S.country === "kw" ? kwProCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
 
     ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
@@ -788,7 +793,7 @@ SCREENS.event = (id) => {
   } else if (S.evTab === "results") {
     if (e.status === "finished") {
       body = `<div class="seg" style="padding:0" role="group" aria-label="Category">${CATS.map((c) => `<button aria-pressed="${S.evCat === c.id}" data-act="evCat" data-v="${c.id}">${c.name}</button>`).join("")}</div>
-        <div style="display:flex;flex-direction:column;gap:10px">${((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).length ? ((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).map(([n, c], i) => `<div class="rowcard"><div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;letter-spacing:.08em;font-size:12px">${c}</span></div>`).join("") : `<div class="card" style="padding:22px 16px;text-align:center"><b>No results in this division</b></div>`}</div>`;
+        <div style="display:flex;flex-direction:column;gap:10px">${((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).length ? ((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).map(([n, c], i) => `<div class="rowcard"><div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;letter-spacing:.08em;font-size:12px">${c}</span></div>`).join("") : `<div class="card" style="padding:22px 16px;text-align:center"><b>No results in this division</b></div>`}${e.real && e.resNote && e.resNote[S.evCat] ? `<p class="note" style="padding:0">${e.resNote[S.evCat]}</p>` : ""}${e.real && (e.resSrc || e.url) ? xl(e.resSrc || e.url, "Full results") : ""}</div>`;
     } else if (e.status === "live") {
       body = `<div style="display:flex;flex-direction:column;gap:14px">${liveBoard()}</div><p class="note" style="padding:0">Sample live results for the demo.</p>`;
     } else {
@@ -2563,7 +2568,7 @@ Object.assign(AR, {
 if ((!location.hash || location.hash === "#") && S.suDone && S.langSet) setTimeout(() => { if (route()[0] === "splash") location.replace("#home"); }, 3200);
 
 Object.assign(AR, {
-  "Upcoming events": "البطولات القادمة", "No results in this division": "لا توجد نتائج في هذه الفئة", "Upcoming": "قادمة", "Federation": "الاتحاد", "Official page": "الصفحة الرسمية", "Practice round": "جولة تجريبية", "Sample athletes": "لاعبون تجريبيون",
+  "Upcoming events": "البطولات القادمة", "No results in this division": "لا توجد نتائج في هذه الفئة", "Full results": "النتائج كاملة", "14 more athletes tied for 16th place.": "14 لاعب آخرين تشاركوا المركز 16.", "Top Kuwaiti": "أفضل كويتي", "Kuwait": "الكويت", "UAE": "الإمارات", "Oman": "عُمان", "Bahrain": "البحرين", "Turkey": "تركيا", "Libya": "ليبيا", "France": "فرنسا", "Philippines": "الفلبين", "Upcoming": "قادمة", "Federation": "الاتحاد", "Official page": "الصفحة الرسمية", "Practice round": "جولة تجريبية", "Sample athletes": "لاعبون تجريبيون",
   "Headlines and events open their original source.": "الأخبار والبطولات تفتح مصدرها الأصلي.",
   "Schedule not published yet": "الجدول لم يُنشر بعد", "The timetable appears here when the organizer publishes it.": "يظهر الجدول هنا أول ما ينشره المنظم.",
   "Real picks open when the start list is published. Until then, play the practice round below with sample athletes.": "التوقعات الحقيقية تفتح أول ما تنتشر قائمة المشاركين. لين ذاك الوقت، جرّب الجولة التجريبية تحت بلاعبين تجريبيين.",
