@@ -664,11 +664,11 @@ SCREENS.splash = () => `
       <h1 class="disp sp-t vh" style="font-weight:800;font-style:italic;line-height:1;letter-spacing:.02em;background:linear-gradient(180deg,#F6E08A,#B8902B);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">BB365</h1>
       <div class="sp-sub" data-keep style="font-size:13px;letter-spacing:.5em;color:#C9C9D1;font-weight:500">BODYBUILDING 365</div>
     </div>
-    <div class="sp-cta" data-keep>
+    ${S.suDone && S.langSet ? `<div class="sp-cta" style="min-height:120px"></div>` : `<div class="sp-cta" data-keep>
       <button class="btn gold block" data-act="suGo" data-v="up">Create account</button>
       <button class="btn line block" data-act="suGo" data-v="in">Sign in</button>
       <button class="sp-skip" data-act="suSkip">Skip for now</button>
-    </div>
+    </div>`}
   </div>`;
 
 /* ============ home feed: real headlines with sources (checked Nov 12, 2026) ============ */
@@ -2540,7 +2540,8 @@ Object.assign(AR, {
   "Account created": "تم إنشاء الحساب", "Signed in": "تم تسجيل الدخول", "Signed out": "تم تسجيل الخروج", "Show password": "إظهار كلمة المرور", "Hide password": "إخفاء كلمة المرور", "Back": "رجوع", "Sign out": "تسجيل الخروج", "Account": "الحساب"
 });
 
-if ((!location.hash || location.hash === "#") && S.suDone && S.langSet) history.replaceState(null, "", "#home");
+// returning users still see the light come on, then go straight to the home page
+if ((!location.hash || location.hash === "#") && S.suDone && S.langSet) setTimeout(() => { if (route()[0] === "splash") location.replace("#home"); }, 3200);
 render(false);
 </script>
 
