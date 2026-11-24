@@ -45,7 +45,7 @@ ICONS = [
 NOT_BB = re.compile(r"powerlift|\bIPF\b|strongman|crossfit|weightlifting|arm ?wrestl", re.I)
 KINDS = [
     ("result", re.compile(r"\bresults?\b|\bwins?\b|\bwon\b|crowned|scorecard|takes (the )?(title|overall|crown)|champion(s|ship)? (crowned|recap)", re.I)),
-    ("drama", re.compile(r"slams?|fires? back|responds? to|calls? out|robbed|controvers|beef|feud|criticiz|blasts?|claps? back|disqualif|banned|accus|reacts? to|rips?\b", re.I)),
+    ("drama", re.compile(r"\bslams?\b|fires? back|responds? to|calls? out|\brobbed\b|controvers|\bbeef\b|\bfeud|criticiz|\bblasts?\b|claps? back|disqualif|\bbanned\b|accus|reacts? to|\brips?\b", re.I)),
 ]
 NS = {"atom": "http://www.w3.org/2005/Atom", "media": "http://search.yahoo.com/mrss/"}
 
