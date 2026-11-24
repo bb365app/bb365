@@ -32,7 +32,7 @@ FEEDS = [
 ]
 
 BB_WORDS = re.compile(
-    r"bodybuild|olympia|ifbb|npc|\bpro\b|physique|classic|bikini|wellness|figure|prep|posing|"
+    r"bodybuild|olympia|ifbb|npc|\bpro\b|physique|classic|prep|posing|"
     r"contest|champion|walker|dauda|cbum|bumstead|lunsford|ramy|rambod|cutler|coleman|arnold|kuwait|gulf|arab|saudi|dubai|qatar|bodybuilder",
     re.I,
 )
@@ -43,6 +43,8 @@ ICONS = [
     (re.compile(r"slam|feud|beef|robbed|callout|responds|fires back|controvers|banned", re.I), "bolt"),
 ]
 NOT_BB = re.compile(r"powerlift|\bIPF\b|strongman|crossfit|weightlifting|arm ?wrestl", re.I)
+# women's divisions are left out of the app
+WOMEN = re.compile(r"bikini|wellness|\bfigure\b|fit ?model|ms\.? olympia|women|female|\bher\b|\bshe\b|girl", re.I)
 KINDS = [
     ("result", re.compile(r"\bresults?\b|\bwins?\b|\bwon\b|crowned|scorecard|takes (the )?(title|overall|crown)|champion(s|ship)? (crowned|recap)", re.I)),
     ("drama", re.compile(r"\bslams?\b|fires? back|responds? to|calls? out|\brobbed\b|controvers|\bbeef\b|\bfeud|criticiz|\bblasts?\b|claps? back|disqualif|\bbanned\b|accus|reacts? to|\brips?\b", re.I)),
@@ -96,6 +98,8 @@ def read_feed(name, url, only_bb):
         if not BB_WORDS.search(title if only_bb == "title" else title + " " + cats):
             continue
         if NOT_BB.search(title) and not re.search(r"bodybuild", title + " " + cats, re.I):
+            continue
+        if WOMEN.search(title):
             continue
         icon = next((i for rx, i in ICONS if rx.search(title)), "news")
         kind = next((k for k, rx in KINDS if rx.search(title)), "news")
