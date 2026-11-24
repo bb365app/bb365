@@ -1,6 +1,15 @@
 {
- "updated": "2026-11-24T15:08:34Z",
+ "updated": "2026-11-24T17:58:57Z",
  "items": [
+  {
+   "t": "Bodybuilder Iain Valliere Announces Comeback; To Compete at 2026 Bigman Weekend Championships Pro Show This Weekend",
+   "url": "https://fitnessvolt.com/iain-valliere-announces-comeback/",
+   "src": "Fitness Volt",
+   "date": "Nov 24, 2026",
+   "ts": 1795536640,
+   "ic": "trophy",
+   "kind": "news"
+  },
   {
    "t": "Wesley Vissers Reveals the 3 Moves He’s Using to Build a Massive Chest for the 2027 Arnold Classic",
    "url": "https://fitnessvolt.com/wesley-vissers-3-chest-moves-for-2027-arnold-classic/",
@@ -98,15 +107,6 @@
    "date": "Nov 16, 2026",
    "ts": 1794833482,
    "ic": "news",
-   "kind": "news"
-  },
-  {
-   "t": "Terrence Ruffin Reveals His Strategy to Become 2027 Olympia Champion",
-   "url": "https://www.muscleandfitness.com/flexonline/flex-news/terrence-ruffin-reveals-his-strategy-to-become-2027-olympia-champion/",
-   "src": "Muscle & Fitness",
-   "date": "Nov 16, 2026",
-   "ts": 1794833137,
-   "ic": "trophy",
    "kind": "news"
   }
  ]
