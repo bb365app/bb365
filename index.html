@@ -186,7 +186,8 @@ img{display:block}
 .next-dots i.on{width:18px;background:var(--gold)}
 .next-ev{position:relative;border-radius:22px;overflow:hidden;border:1px solid #4A3C16;background:var(--s2);display:flex;flex-direction:column;gap:14px;padding:18px;min-height:280px;justify-content:flex-end;isolation:isolate}
 .next-ev>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.next-ev::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 48%,#000 100%)}
+.next-ev::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.82) 42%,#000 100%)}
+.next-ev>img{opacity:.7}
 .next-t{font-weight:800;font-size:32px;line-height:1;text-transform:uppercase;display:block;margin-top:8px}
 .cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .cd div{background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:12px;padding:8px 2px;text-align:center}
@@ -544,8 +545,8 @@ const REAL_EVENTS = [
       physique: [["Michael Van Niekerk", "South Africa"], ["Hashem Alfotewi", "Saudi Arabia"], ["Qaiser Al-Asi", "Bahrain"], ["Ozcan Kirant", "Turkey"], ["Mahmood Al-Maghrabi", "Bahrain"], ["Ibrahim Cheikh Ousmane", "Saudi Arabia"], ["Sanad Alsanad", "Kuwait"], ["Hamed Abdalla", "Libya"], ["Abdullah Al Salem", "Kuwait"], ["Bader Alsabri", "Kuwait"], ["Mohammed Haidar", "UAE"], ["Husain Manowchehri", "Bahrain"], ["Yousef Alfailakawi", "Kuwait"], ["Ahmad Alshammari", "Kuwait"], ["Mohammad Alrughaib", "Kuwait"]] },
     divs: ["classic", "physique"], resNote: { physique: "14 more athletes tied for 16th place." }, resSrc: "https://fitnessvolt.com/2026-kuwait-pro-results/" },
   { id: "olympia26", name: "Mr. Olympia 2026", date: "Sep 24–27, 2026", place: "Las Vegas, USA", status: "finished", img: "cv_olympia26", start: new Date(2026, 8, 24, 9, 0, 0),
-    fed: "IFBB Pro League", about: "The biggest show in bodybuilding. Nick Walker won the Mr. Olympia title; Samson Dauda won the finals but finished second overall.", url: "https://fitnessvolt.com/2026-mr-olympia-results/", src: "Fitness Volt",
-    res: { open: [["Nick Walker", ""], ["Samson Dauda", ""], ["Derek Lunsford", ""]], classic: [["Niall Darwen", ""]], physique: [["Ryan Terry", ""]], "212": [["Keone Pearson", ""]] }, divs: ["open", "212", "classic", "physique"] }
+    fed: "IFBB Pro League", about: "The biggest show in bodybuilding. Nick Walker won the Mr. Olympia title; Samson Dauda won the finals but finished second overall.", url: "https://fitnessvolt.com/2026-mr-olympia-results/", src: "Fitness Volt", resNote: { open: "Top 5 in each division.", classic: "Top 5 in each division.", physique: "Top 5 in each division.", "212": "Top 5 in each division." },
+    res: { open: [["Nick Walker", ""], ["Samson Dauda", ""], ["Derek Lunsford", ""], ["Andrew Jacked", ""], ["Tonio Burton", ""]], classic: [["Niall Darwen", ""], ["Mike Sommerfeld", ""], ["Ramon Dino", ""], ["Wesley Vissers", ""], ["Terrence Ruffin", ""]], physique: [["Ryan Terry", ""], ["Ali Bilal", ""], ["Kyron Holden", ""], ["Erin Banks", ""], ["Brandon Hendrickson", ""]], "212": [["Keone Pearson", ""], ["Lucas Garcia", "Brazil"], ["Shaun Clarida", ""], ["Vitor Alves Porto De Oliveira", ""], ["Nihat Kaya", ""]] }, divs: ["open", "212", "classic", "physique"] }
 ];
 EVENTS.push(...REAL_EVENTS.map((e) => Object.assign({ real: true, reg: false, fee: 0, spots: 0, taken: 0 }, e)));
 const shownEvents = () => EVENTS.filter((e) => !e.hidden);
@@ -657,7 +658,7 @@ const S = {
     try { const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; if (tz === "Asia/Riyadh") return "sa"; if (tz === "Asia/Kuwait") return "kw"; } catch (e) {}
     try { const r = (navigator.languages || [navigator.language || ""]).join(" "); if (/-SA\b/i.test(r)) return "sa"; } catch (e) {}
     return "kw"; })(),
-  user: saved.user && typeof saved.user === "object" && saved.user.phone ? saved.user : null, suDone: !!saved.suDone, langSet: !!saved.langSet || (!!saved.lang && !!saved.suDone),
+  user: saved.user && typeof saved.user === "object" && saved.user.phone ? saved.user : null, acct: saved.acct && typeof saved.acct === "object" && saved.acct.phone ? saved.acct : saved.user && saved.user.phone ? saved.user : null, suDone: !!saved.suDone, langSet: !!saved.langSet || (!!saved.lang && !!saved.suDone),
   su: { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} },
   regs: (Array.isArray(saved.regs) ? saved.regs : []).filter((r) => r && EV(r.event)), follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: saved.remind && typeof saved.remind === "object" ? saved.remind : {},
   filter: "all", liveCat: "open", evTab: "overview", evCat: "open", shopCat: "supplements", cart: {}, sheet: null,
@@ -668,7 +669,7 @@ const S = {
   tickets: (Array.isArray(saved.tickets) ? saved.tickets : []).filter((t) => t && EV(t.event)), lang: saved.lang === "ar" ? "ar" : "en", coach: Object.assign({ goal: "muscle", level: "inter", days: 4, mins: 60, equip: "gym", focus: [], avoid: [] }, saved.coach || {}), coachPlan: saved.coachPlan || null, photos: Array.isArray(saved.photos) ? saved.photos : [], groups: saved.groups || null, picks: saved.picks && typeof saved.picks === "object" ? saved.picks : {}, predOut: !!saved.predOut, seen: saved.seen || {}, tk: null, tkFresh: null, rankDiv: "open",
   orm: { w: "", r: "" }, fat: { neck: "", waist: "", hip: "" }, logIn: { w: "", d: new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10) }, s: { q: "" }
 };
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ langSet: S.langSet, user: S.user, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut, remind: S.remind })); } catch (e) {} };
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ langSet: S.langSet, user: S.user, acct: S.acct, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut, remind: S.remind })); } catch (e) {} };
 const spotsTaken = (e) => e.taken + S.regs.filter((r) => r.event === e.id).length;
 const newReg = (eventId) => ({ event: eventId, step: 1, busy: false, pay: "knet", photo: null, errors: {},
   data: { category: "", name: "", dob: "", nat: "Kuwait", phone: "", email: "", height: "", weight: "", club: "Independent", ig: "", rules: false, fit: false } });
@@ -767,7 +768,7 @@ const resCard = (r) => `<div class="res"><div class="res-h"><span class="res-ic"
 const champsCard = () => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1"><b style="font-size:15px">2026 Olympia champions</b><div class="muted" style="font-size:12px;margin-top:2px">Las Vegas · Sep 24–27, 2026</div></div></div>
   <div class="champs">${CHAMPS.map(([d, w]) => `<div class="champ"><span>${esc(d)}</span><b>${esc(w)}</b></div>`).join("")}</div>${xl("https://fitnessvolt.com/2026-mr-olympia-results/", FV)}</div>`;
 const dramaCard = (x) => `<div class="drama"><div class="row" style="justify-content:space-between;gap:10px"><span class="chip live">${ic("flame", 12, 2)} ${esc(x.tag)}</span><span class="muted" style="font-size:12px">${esc(x.date)}</span></div>
-  <div class="vs"><b class="n">${esc(x.a)}</b><i>VS</i><b class="n">${esc(x.b)}</b></div>
+  <div class="vs"><b class="n">${esc(x.a)}</b><i>${S.lang === "ar" ? "ضد" : "VS"}</i><b class="n">${esc(x.b)}</b></div>
   <div><b style="font-size:16px;line-height:1.3">${esc(x.t)}</b><p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:#D8D8DE">${esc(x.d)}</p></div>${xl(x.url, x.src)}</div>`;
 const daysTo = (e) => { const n = Math.ceil((new Date(e.start).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 864e5); return n <= 0 ? "Today" : n === 1 ? "Tomorrow" : n + " days"; };
 const nextEvents = () => shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now() && e.date !== "Date not announced").sort((a, b) => a.start - b.start).slice(0, 4);
@@ -775,7 +776,7 @@ const nextCard = () => { const list = nextEvents(); if (!list.length) return "";
   const card = (e, i) => { const on = !!S.remind[e.id];
     return `<div class="next-ev" data-cd="${e.start.getTime()}" role="group" aria-label="${i + 1} / ${list.length}"><img src="${IMG[e.img]}" alt="">
     <a href="#event-${e.id}" style="display:block"><span class="chip gold">${i ? "Up next" : "Next event"}</span><b class="disp next-t">${esc(e.name)}</b><div class="muted" style="font-size:13px;margin-top:6px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></a>
-    <div class="cd" role="timer" aria-label="Time until it starts">${[["d", "days"], ["h", "hours"], ["m", "min"], ["s", "sec"]].map(([u, l]) => `<div><b data-u="${u}" data-keep>0</b><span>${l}</span></div>`).join("")}</div>
+    <div class="cd" role="timer" aria-label="Time until it starts">${[["d", "Days"], ["h", "Hours"], ["m", "Min"], ["s", "Sec"]].map(([u, l]) => `<div><b data-u="${u}" data-keep>0</b><span>${l}</span></div>`).join("")}</div>
     <div class="row g8"><a href="#event-${e.id}" class="btn gold sm" style="flex:1">See event</a><button class="btn line sm" style="flex:1" aria-pressed="${on}" data-act="remind" data-v="${e.id}">${ic("bell", 16)} ${on ? "Saved" : "Remind me"}</button></div></div>`; };
   return `<div class="next-row${list.length > 1 ? " multi" : ""}" aria-label="Next events">${list.map(card).join("")}</div>${list.length > 1 ? `<div class="next-dots" aria-hidden="true">${list.map((x, i) => `<i${i ? "" : ' class="on"'}></i>`).join("")}</div>` : ""}`; };
 const saCard = () => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">Top Saudi result</b><div class="muted" style="font-size:12px;margin-top:2px">Romania Muscle Fest Pro 2026 · Nov 7–8, 2026</div></div><span class="chip gold">Saudi Arabia</span></div>
@@ -783,8 +784,8 @@ const saCard = () => `<div class="res"><div class="res-h"><span class="res-ic">$
 const kwProCard = () => { const e = EV("kwpro26"); if (!e) return "";
   return `<a href="#event-kwpro26" class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></div><span class="chip gold">Kuwait</span></div>
   ${[["Classic Physique", e.res.classic[0][0] + " · " + e.res.classic[0][1]], ["Men's Physique", e.res.physique[0][0] + " · " + e.res.physique[0][1]], ["Top Kuwaiti", e.res.classic[2][0] + " · 3rd"]].map(([d, w]) => `<div class="win"><span class="muted">${d}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}</a>`; };
-const autoCard = (icn) => (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="res" style="flex-direction:row;align-items:center;gap:12px"><span class="res-ic">${ic(icn, 22)}</span><div style="flex:1;min-width:0"><b dir="auto" data-keep style="display:block;font-size:15px;line-height:1.3">${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="muted" style="font-size:12px;margin-top:4px"><span data-keep>${esc(n.src)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
-const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><span data-keep>${esc(n.src || FV)}</span> · <span>${esc(n.date)}</span></div></div>${ic("ext", 16, 2)}</a>`;
+const autoCard = (icn) => (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="res" style="flex-direction:row;align-items:center;gap:12px"><span class="res-ic">${ic(icn, 22)}</span><div style="flex:1;min-width:0"><b dir="auto" data-keep style="display:block;font-size:15px;line-height:1.3">${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="muted" style="font-size:12px;margin-top:4px"><bdi data-keep>${esc(n.src)}</bdi> · <bdi>${esc(n.date)}</bdi></div></div>${ic("ext", 16, 2)}</a>`;
+const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><bdi data-keep>${esc(n.src || FV)}</bdi> · <bdi>${esc(n.date)}</bdi></div></div>${ic("ext", 16, 2)}</a>`;
 
 SCREENS.home = () => {
   const e = homeEv(); const f = S.feed || "all"; const on = (k) => f === "all" || f === k;
@@ -816,7 +817,8 @@ SCREENS.events = () => `
   <div class="scroll view-in">
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Events</h1></div>
     <div class="seg" role="group" aria-label="Filter events">${[["all", "All"], ["upcoming", "Upcoming"], ["live", "Live"], ["finished", "Finished"]].map(([k, l]) => `<button aria-pressed="${S.filter === k}" data-act="filter" data-v="${k}">${l}</button>`).join("")}</div>
-    <div class="sec">${evSort(shownEvents()).filter((e) => S.filter === "all" || e.status === S.filter).map((e) => evCard(e, 200)).join("")}</div>
+    <div class="sec">${(() => { const list = evSort(shownEvents()).filter((e) => S.filter === "all" || e.status === S.filter); if (list.length) return list.map((e) => evCard(e, 200)).join(""); const nx = homeEv();
+      return `<div class="card" style="padding:24px 18px;display:flex;flex-direction:column;gap:12px;text-align:center"><b style="font-size:16px">${S.filter === "live" ? "No show is live right now" : "Nothing here yet"}</b>${nx ? `<div class="muted" style="line-height:1.5">Next: ${esc(nx.name)} · ${esc(nx.date)}</div><a href="#event-${nx.id}" class="btn gold sm">See event</a>` : ""}</div>`; })()}</div>
   </div>${tabbar("events")}`;
 
 SCREENS.event = (id) => {
@@ -852,7 +854,7 @@ SCREENS.event = (id) => {
       body = `<div class="card" style="padding:28px 20px;text-align:center"><b>No results yet</b><div class="muted" style="margin-top:6px;line-height:1.5">Placings appear here category by category as soon as the judges confirm them.</div></div>`;
     }
   } else {
-    body = e.real ? `<div class="card" style="padding:28px 20px;text-align:center"><b>Schedule not published yet</b><div class="muted" style="margin-top:6px;line-height:1.5">The timetable appears here when the organizer publishes it.</div></div>` : DAYS.map(([d, rows]) => `<div style="display:flex;flex-direction:column;gap:10px"><div class="disp" style="font-size:18px;letter-spacing:.1em;color:var(--gold)">${d}</div>${rows.map(([t, n, s]) => `<div class="rowcard"><div class="num" style="flex:none;width:52px;font-weight:700">${t}</div><div><b>${n}</b><div class="muted" style="font-size:12px;margin-top:2px">${s}</div></div></div>`).join("")}</div>`).join("");
+    body = e.real ? (e.status === "finished" ? `<div class="card" style="padding:28px 20px;text-align:center"><b>This show has finished</b><div class="muted" style="margin-top:6px;line-height:1.5">See the Results tab for the placings.</div></div>` : `<div class="card" style="padding:28px 20px;text-align:center"><b>Schedule not published yet</b><div class="muted" style="margin-top:6px;line-height:1.5">The timetable appears here when the organizer publishes it.</div></div>`) : DAYS.map(([d, rows]) => `<div style="display:flex;flex-direction:column;gap:10px"><div class="disp" style="font-size:18px;letter-spacing:.1em;color:var(--gold)">${d}</div>${rows.map(([t, n, s]) => `<div class="rowcard"><div class="num" style="flex:none;width:52px;font-weight:700">${t}</div><div><b>${n}</b><div class="muted" style="font-size:12px;margin-top:2px">${s}</div></div></div>`).join("")}</div>`).join("");
   }
   const cta = e.reg
     ? (mine ? `<a href="#register-${e.id}" class="btn gold" style="flex:1">${ic("check")} Registered · View pass</a>`
@@ -992,7 +994,7 @@ SCREENS.profile = () => {
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Profile</h1></div>
     <div class="sec">${S.user ? `<div class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("user", 20)}</span><div style="flex:1;min-width:0"><b dir="auto">${esc(S.user.name)}</b><div class="muted" style="font-size:12px;margin-top:2px" dir="ltr" data-keep>${esc(S.user.cc + " " + S.user.phone)}</div></div><button class="btn line sm" data-act="signOut">Sign out</button></div>`
       : `<a href="#signup" class="btn gold block">${ic("user", 18)} Create account</a>`}</div>
-    <div class="sec"><div class="card row" style="gap:16px;padding:16px"><div class="avatar-lg" style="width:72px;height:72px">${last && last.photo ? `<img src="${last.photo}" alt="">` : ic("user", 32)}</div><div style="min-width:0"><div style="font-size:18px;font-weight:700" dir="auto">${last ? esc(last.name) : "Guest athlete"}</div><div class="muted" style="font-size:13px">${last ? esc(last.club) + " · Kuwait" : "Register for an event to build your athlete profile"}</div></div></div></div>
+    <div class="sec"><div class="card row" style="gap:16px;padding:16px"><div class="avatar-lg" style="width:72px;height:72px">${last && last.photo ? `<img src="${last.photo}" alt="">` : ic("user", 32)}</div><div style="min-width:0"><div style="font-size:18px;font-weight:700" dir="auto">${last ? esc(last.name) : S.user ? esc(S.user.name) : "Guest athlete"}</div><div class="muted" style="font-size:13px">${last ? esc(last.club) + " · " + (S.country === "sa" ? "Saudi Arabia" : "Kuwait") : S.user ? "BB365 member" : "Register for an event to build your athlete profile"}</div></div></div></div>
     <div class="sec" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${[[S.regs.length, "Entries"], [following.length, "Following"], [pdDone(), "Predictions"]].map(([n, l]) => `<div class="fact" style="align-items:center"><b class="disp" style="font-size:30px;line-height:1">${n}</b><span>${l}</span></div>`).join("")}</div>
 
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>Country</h2></div><div class="seg" style="padding:0" role="radiogroup" aria-label="Country">${["kw", "sa"].map((k) => `<button role="radio" aria-checked="${S.country === k}" aria-pressed="${S.country === k}" data-act="country" data-v="${k}">${tx(CN[k].en, CN[k].ar)}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">Set automatically from your location. Prices, events and clubs follow it.</p></div>
@@ -1395,7 +1397,7 @@ function notifs() {
   S.tickets.slice().reverse().forEach((t) => { const e = EV(t.event); const tier = TIERS.find((x) => x.id === t.tier);
     out.push({ id: `tk-${t.id}`, ic: "ticket", tone: "ok", t: "Ticket confirmed", d: `${tier.name} × ${t.qty} · ${e.name}`, h: `#ticket-${t.id}`, when: t.date }); });
   shownEvents().filter((e) => S.remind[e.id] && e.status !== "finished").sort((a, b) => a.start - b.start).forEach((e) => { const dt = e.date !== "Date not announced" ? daysTo(e) : ""; const soon = /^(Today|Tomorrow|[1-7] days)$/.test(dt);
-    out.push({ id: `sv-${e.id}-${soon ? dt : "later"}`, ic: "bell", tone: soon ? "live" : "gold", t: e.status === "live" ? "Live now" : soon ? "Starts in " + dt : "Saved event", d: `${e.name} · ${e.date}`, h: `#event-${e.id}`, when: "Your events" }); });
+    out.push({ id: `sv-${e.id}-${soon ? dt : "later"}`, ic: "bell", tone: soon ? "live" : "gold", t: e.status === "live" ? "Live now" : dt === "Today" ? "Starts today" : dt === "Tomorrow" ? "Starts tomorrow" : soon ? "Starts in " + dt : "Saved event", d: `${e.name} · ${e.date}`, h: `#event-${e.id}`, when: "Your events" }); });
   out.push({ id: "r-saudi", ic: "calendar", tone: "gold", t: "Saudi Arabia Pro is on Dec 5–6 in Riyadh", d: "212, Classic Physique and Men's Physique.", h: "#event-saudipro", when: "Upcoming" });
   out.push({ id: "r-kw", ic: "trophy", tone: "ok", t: "Kuwait Pro 2026 results are final", d: "Poghosyan won Classic Physique, Van Niekerk won Men's Physique.", h: "#event-kwpro26", when: "Results" });
   out.push({ id: "r-uk", ic: "calendar", tone: "gold", t: "Arnold Classic UK 2027 is Mar 19–21", d: "At the NEC in Birmingham.", h: "#event-arnolduk27", when: "Upcoming" });
@@ -1601,7 +1603,7 @@ const ACT = {
   orgF: (v) => { S.orgF = v; },
   orgSet: (v) => { const [k, st] = v.split(":"); if (k[0] === "s") S.org[k] = st; else if (S.regs[+k.slice(1)]) S.regs[+k.slice(1)].status = st; persist(); toast(st === "approved" ? "Entry approved" : st === "rejected" ? "Entry rejected" : "Back to pending"); },
   searchSet: (v) => { S.s.q = v; },
-  follow: (v) => { S.follow[v] = !S.follow[v]; persist(); toast(S.follow[v] ? "Following" : "Unfollowed"); },
+  follow: (v) => { S.follow[v] = !S.follow[v]; persist(); toast(S.follow[v] ? "You are following this athlete" : "Unfollowed"); },
   alert: (v) => { S.alerts[v] = !S.alerts[v]; },
   plan: (v) => { const [id, p] = v.split(":"); if (S.subs[id]) S.subs[id] = p; else S.plan[id] = p; persist(); },
   sub: (v) => { if (S.subs[v]) { delete S.subs[v]; toast("Subscription cancelled"); } else { S.subs[v] = S.plan[v] || "m"; toast("Subscribed"); } persist(); },
@@ -1655,7 +1657,7 @@ document.addEventListener("input", (ev) => {
 document.addEventListener("input", (ev) => {
   const g = ev.target.dataset && ev.target.dataset.g; if (!g) return;
   const [o, k] = g.split("."); S[o][k] = ev.target.value; persist();
-  const out = document.getElementById("g-out"); if (out && GOUT[out.dataset.o] && o !== "logIn") out.innerHTML = GOUT[out.dataset.o]();
+  const out = document.getElementById("g-out"); if (out && GOUT[out.dataset.o] && o !== "logIn") { out.innerHTML = GOUT[out.dataset.o](); if (S.lang === "ar") trTree(out); }
 });
 document.addEventListener("input", (ev) => {
   const k = ev.target.dataset && ev.target.dataset.tk; if (!k || !S.tk) return;
@@ -1951,7 +1953,7 @@ const PRED_SRC = "https://fitnessvolt.com/2026-mr-olympia-results/";
 const PD_ORDER = ["classic", "physique", "open"];
 const PD_PTS = [5, 3, 2];
 const PD_FR = []; // friends come from Challenges groups once real accounts exist
-const pdLock = (c) => ((LIVE[c].when || "").match(/\d\d:\d\d/) || [""])[0];
+const pdLock = () => ""; // the practice round has no lock time
 const pdState = (c) => (PRED[c] ? (S.predOut ? "scored" : "open") : LIVE[c].st === "live" ? "locked" : "final");
 const pdPick = (c) => (PRED[c] && Array.isArray(S.picks[c]) ? S.picks[c].filter((n) => PRED[c].list.some((x) => x[0] === n)).slice(0, 3) : []);
 const pdPts = (c, i) => { const n = pdPick(c)[i], r = PRED[c].result; return !n ? 0 : r[i] === n ? PD_PTS[i] : r.includes(n) ? 1 : 0; };
@@ -1963,7 +1965,7 @@ const pdDone = () => Object.keys(PRED).filter((c) => pdPick(c).length === 3).len
 SCREENS.predict = () => {
   const e = homeEv() || EV("olympia26"); const c = PD_ORDER.includes(S.predCat) ? S.predCat : "classic"; const st = pdState(c); const P = PRED[c]; const pick = pdPick(c);
   const cn = CATS.find((x) => x.id === c).name; const [rk, of] = pdRank();
-  const chip = st === "open" ? '<span class="chip gold">Open</span>' : st === "locked" ? '<span class="chip live">Locked</span>' : '<span class="chip ok">Final</span>';
+  const chip = st === "open" ? '<span class="chip gold">Practice</span>' : st === "locked" ? '<span class="chip live">Locked</span>' : '<span class="chip ok">Final</span>';
   const top3 = (rows) => rows.slice(0, 3).map(([n, cc], i) => `<div class="rowcard"><div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;font-size:12px">${cc}</span></div>`).join("");
   let body;
   if (st === "open") {
@@ -2254,6 +2256,9 @@ Object.assign(AR, {
   "USA": "أمريكا", "GER": "ألمانيا", "ESP": "إسبانيا", "ITA": "إيطاليا", "CZE": "التشيك", "POL": "بولندا", "GBR": "بريطانيا", "BRA": "البرازيل",
   "CAN": "كندا", "SWE": "السويد", "DEN": "الدنمارك", "BUL": "بلغاريا", "TUR": "تركيا", "IRN": "إيران"
 });
+const arN = (n, one, two, many, single) => { n = +n; return n === 1 ? one : n === 2 ? two : n >= 3 && n <= 10 ? `${n} ${many}` : `${n} ${single}`; };
+const arDays = (n) => arN(n, "يوم واحد", "يومين", "أيام", "يوم");
+const arWeeks = (n) => arN(n, "أسبوع واحد", "أسبوعين", "أسابيع", "أسبوع");
 const AR_RX = [
   [new RegExp("^" + MRX + " (\\d{1,2}(?:–\\d{1,2})?), (\\d{4})$"), (m, mo, d, y) => `${d} ${AR_MON[mo]} ${y}`],
   [new RegExp("^(\\d{1,2}) " + MRX + " (\\d{4})$"), (m, d, mo, y) => `${d} ${AR_MON[mo]} ${y}`],
@@ -2280,11 +2285,11 @@ const AR_RX = [
   [/^(\d+) active plans?$/, (m, a) => `${a} اشتراك فعّال`],
   [/^([\d,]+) (?:people|person)$/, (m, a) => arPeople(+a.replace(/,/g, ""))],
   [/^(\d+) adults$/, (m, a) => `${a} بالغًا`],
-  [/^(\d+) weeks?$/, (m, a) => `${a} أسبوعًا`],
+  [/^(\d+) weeks?$/, (m, a) => arWeeks(a)],
   [/^([\d,]+) studies$/, (m, a) => `${a} دراسة`],
   [/^(\d+) servings$/, (m, a) => `${a} حصة`],
   [/^(.+) × (\d+)$/, (m, a, b) => `${T(a)} × ${b}`],
-  [/^(\d+) weeks? out$/, (m, a) => (+a === 1 ? "قبل أسبوع" : `قبل ${a} أسابيع`)],
+  [/^(\d+) weeks? out$/, (m, a) => (+a === 1 ? "قبل أسبوع" : `قبل ${arWeeks(a)}`)],
   [/^([\d,]+) kcal$/, (m, a) => `${a} سعرة`],
   [/^([\d.,]+) kg$/, (m, a) => `${a} كغ`],
   [/^([\d.,]+) cm$/, (m, a) => `${a} سم`],
@@ -2295,10 +2300,11 @@ const AR_RX = [
   [/^Protein is set at ([\d.]+) g per kg for this goal and fat at about 25% of calories\..*$/, (m, a) => `البروتين محسوب على ${a} غ لكل كغ لهذا الهدف، والدهون حوالي 25% من السعرات. هذه إرشادات عامة وليست نصيحة طبية، وإذا عندك حالة صحية راجع طبيبًا أو أخصائي تغذية.`],
   [/^about (\d+) ml per kg$/, (m, a) => `حوالي ${a} مل لكل كغ`],
   [/^(\d+) g per ([\d,]+) kcal$/, (m, a, b) => `${a} غ لكل ${b} سعرة`],
-  [/^(\d+) meals$/, (m, a) => `${a} وجبات`],
-  [/^(\d+) days a week$/, (m, a) => `${a} أيام بالأسبوع`],
-  [/^(\d+) days$/, (m, a) => `${a} أيام`],
-  [/^(\d+) months$/, (m, a) => `${a} أشهر`],
+  [/^(\d+) meals$/, (m, a) => arN(a, "وجبة وحدة", "وجبتين", "وجبات", "وجبة")],
+  [/^(\d+) days a week$/, (m, a) => `${arDays(a)} بالأسبوع`],
+  [/^Starts in (\d+) days$/, (m, a) => `تبدأ بعد ${arDays(a)}`],
+  [/^(\d+) days?$/, (m, a) => arDays(a)],
+  [/^(\d+) months$/, (m, a) => arN(a, "شهر واحد", "شهرين", "أشهر", "شهر")],
   [/^save (\d+)%$/, (m, a) => `وفّر ${a}%`],
   [/^Rest ([\d–]+) min$/, (m, a) => `راحة ${a} د`],
   [/^Rest ([\d–]+) s$/, (m, a) => `راحة ${a} ث`],
@@ -2306,7 +2312,7 @@ const AR_RX = [
   [/^Average of last (\d+) entr(?:y|ies)$/, (m, a) => `متوسط آخر ${a} قياس`],
   [/^Delete entry (.+)$/, (m, a) => `حذف القياس ${a}`],
   [/^Average of the Epley \(([\d.]+)\) and Brzycki \(([\d.]+)\) formulas$/, (m, a, b) => `متوسط معادلتي Epley (${a}) وBrzycki (${b})`],
-  [/^(\d+)% · about (\d+) reps?$/, (m, a, b) => `${a}% · حوالي ${b} تكرار`],
+  [/^(\d+)% · about (\d+) reps?$/, (m, a, b) => `${a}% · حوالي ${arN(b, "تكرار واحد", "تكرارين", "تكرارات", "تكرار")}`],
   [/^([\d.]+)% of body weight$/, (m, a) => `${a}% من وزن الجسم`],
   [/^Method: (.+)\. These are estimates and can be off by about 10%\. Weigh yourself for 2–3 weeks and adjust\.$/, (m, a) => `الطريقة: ${T(a)}. هذه تقديرات وقد تختلف بحوالي 10%، فراقب وزنك لمدة 2–3 أسابيع وعدّل.`],
   [/^Enter your height, neck and waist( and hip)? in centimetres\.$/, (m, h) => `أدخل طولك ومحيط الرقبة والخصر${h ? " والورك" : ""} بالسنتيمتر.`],
@@ -2331,6 +2337,7 @@ const AR_RX = [
   [/^(\d)(?:st|nd|rd|th)$/, (m, a) => AR_ORD[a] || m],
   [/^Register · ([\d.,]+) KD$/, (m, a) => `سجّل · ${a} د.ك`]
 ];
+AR_RX.push([/^Next: (.+)$/, (m, a) => `الجاية: ${T(a)}`]);
 function T(s) {
   if (Object.prototype.hasOwnProperty.call(AR, s)) return AR[s];
   for (const [re, f] of AR_RX) { const m = s.match(re); if (m) return f(...m); }
@@ -2427,14 +2434,14 @@ AR_RX.push(
   [/^([+−-][\d.,]+) kg$/, (m, a) => `${a} كغ`],
   [/^(\d+) min$/, (m, a) => `${a} د`],
   [/^(\d+) × (\d+) min$/, (m, a, b) => `${a} × ${b} د`],
-  [/^In (\d+) days$/, (m, a) => (+a === 2 ? "بعد يومين" : `بعد ${a} أيام`)],
-  [/^in (\d+) weeks?$/, (m, a) => (+a === 1 ? "خلال أسبوع" : `خلال ${a} أسابيع`)],
+  [/^In (\d+) days$/, (m, a) => `بعد ${arDays(a)}`],
+  [/^in (\d+) weeks?$/, (m, a) => `خلال ${arWeeks(a)}`],
   [/^Week (\d+)$/, (m, a) => `الأسبوع ${a}`],
   [/^Progress photo, (.+)$/, (m, a) => `صورة تقدّم، ${T(a)}`],
-  [/^Ends in (\d+) days?$/, (m, a) => (+a === 1 ? "ينتهي بعد يوم" : `ينتهي بعد ${a} أيام`)],
+  [/^Ends in (\d+) days?$/, (m, a) => `ينتهي بعد ${arDays(a)}`],
   [/^You are (\d)(?:st|nd|rd|th) of (\d+)$/, (m, a, b) => `ترتيبك ${AR_ORD[a]} من ${b}`],
-  [/^(\d+) workouts?$/, (m, a) => `${a} تمرين`],
-  [/^(\d+) days ago$/, (m, a) => (+a === 2 ? "قبل يومين" : `قبل ${a} أيام`)],
+  [/^(\d+) workouts?$/, (m, a) => arN(a, "تمرين واحد", "تمرينين", "تمارين", "تمرين")],
+  [/^(\d+) days ago$/, (m, a) => `قبل ${arDays(a)}`],
   [/^You nudged (.+)$/, (m, a) => `نبّهت ${T(a)}`],
   [/^(.+) nudged you$/, (m, a) => `${T(a)} نبّهك`],
   [/^(.+) logged a workout$/, (m, a) => `${T(a)} سجّل تمرينًا`],
@@ -2491,7 +2498,7 @@ AR_RX.push(
   [/^Add one more (.+)$/, (m, a) => `إضافة واحد من ${a}`],
   [/^(.+?) The cut would start about (.+)\.$/, (m, a, b) => `${T(a)} يبدأ التنشيف تقريبًا في ${T(b)}.`]
 );
-AR_RX.push([/^Weight from ([\d.]+) kg to ([\d.]+) kg across (\d+) entries$/, (m, a, b, c) => `الوزن من ${a} كغ إلى ${b} كغ خلال ${c} قياسات`]);
+AR_RX.push([/^Weight from ([\d.]+) kg to ([\d.]+) kg across (\d+) entries$/, (m, a, b, c) => `الوزن من ${a} كغ إلى ${b} كغ خلال ${arN(c, "قياس واحد", "قياسين", "قياسات", "قياس")}`]);
 
 /* ============ Automatic news: when the app is hosted, news.json (written by the news robot) replaces the built-in headlines ============ */
 const NEWS_AUTO = { on: false };
@@ -2617,10 +2624,11 @@ document.addEventListener("submit", (ev) => {
   if (!suPhoneOk(f.phone)) e.phone = S.country === "sa" ? "Enter a 9-digit Saudi mobile number that starts with 5." : "Enter an 8-digit Kuwaiti mobile number.";
   if (m === "up" && f.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = "Enter a valid email, or leave it empty.";
   if (f.pass.length < 8) e.pass = "Use at least 8 characters.";
-  if (m === "in" && !e.phone && (!S.user || S.user.phone !== f.phone)) e.phone = "No account with this number on this phone. Sign up first.";
+  if (m === "in" && !e.phone && (!S.acct || S.acct.phone !== f.phone)) e.phone = "No account with this number on this phone. Sign up first.";
   S.su.err = e;
   if (Object.keys(e).length) { render(true); const first = document.querySelector('[aria-invalid="true"]'); if (first) first.focus(); return; }
-  if (m === "up") S.user = { name: f.name.trim(), phone: f.phone, cc: SU_CC(), email: f.email.trim() };
+  if (m === "up") S.acct = { name: f.name.trim(), phone: f.phone, cc: SU_CC(), email: f.email.trim() };
+  S.user = S.acct;
   S.su = { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} }; S.suDone = true; persist(); // the password is checked for length only and never stored
   toast(m === "in" ? "Signed in" : "Account created"); afterSignup();
 });
@@ -2629,7 +2637,8 @@ Object.assign(ACT, {
   suEye: () => { S.su.show = !S.su.show; },
   suSkip: () => { S.suDone = true; persist(); afterSignup(); },
   suGo: (v) => { S.su.mode = v === "in" ? "in" : "up"; S.su.err = {}; location.hash = "#signup"; },
-  signOut: () => { S.user = null; S.suDone = false; persist(); toast("Signed out"); location.hash = ""; }
+  signOut: () => { S.user = null; S.suDone = false; // the account stays saved on this phone so Sign in works again
+    persist(); toast("Signed out"); location.hash = ""; }
 });
 Object.assign(AR, {
   "Create your account": "أنشئ حسابك", "Welcome back": "أهلًا بعودتك",
@@ -2727,7 +2736,7 @@ Object.assign(AR, {
   "Andrew Jacked": "أندرو جاكد", "Tonio Burton": "تونيو بيرتون"
 });
 Object.assign(AR, {
-  "Next event": "البطولة الجاية", "Up next": "بعدها", "Next events": "البطولات الجاية", "days": "يوم", "hours": "ساعة", "min": "دقيقة", "sec": "ثانية", "Time until it starts": "الوقت الباقي على البداية",
+  "You are following this athlete": "صرت تتابع هذا اللاعب", "BB365 member": "عضو في BB365", "This show has finished": "البطولة خلصت", "See the Results tab for the placings.": "شوف المراكز في تبويب النتائج.", "Practice": "تدريب", "Top 5 in each division.": "أول 5 في كل فئة.", "Lucas Garcia": "لوكاس غارسيا", "Shaun Clarida": "شون كلاريدا", "Vitor Alves Porto De Oliveira": "فيتور ألفيس بورتو دي أوليفيرا", "Nihat Kaya": "نهاد كايا", "Brazil": "البرازيل", "Starts today": "تبدأ اليوم", "Starts tomorrow": "تبدأ باجر", "No show is live right now": "ما فيه بطولة مباشرة الحين", "Nothing here yet": "ما فيه شي هني للحين", "Next event": "البطولة الجاية", "Days": "يوم", "Hours": "ساعة", "Min": "دقيقة", "Sec": "ثانية", "Up next": "بعدها", "Next events": "البطولات الجاية", "days": "يوم", "hours": "ساعة", "min": "دقيقة", "sec": "ثانية", "Time until it starts": "الوقت الباقي على البداية",
   "See event": "شوف البطولة", "Remind me": "ذكّرني", "Saved": "محفوظة", "Saved. Reminders show in Alerts.": "انحفظت. التذكير يطلع لك في التنبيهات.", "Removed from your events": "انشالت من بطولاتك",
   "Add to calendar": "أضف للتقويم", "Starts in": "تبدأ بعد", "Today": "اليوم", "Tomorrow": "باجر", "Live now": "مباشر الحين", "Saved event": "بطولة محفوظة", "Your events": "بطولاتك",
   "My events": "بطولاتي", "Tap the bookmark on an event to save it here.": "اضغط علامة الحفظ في أي بطولة عشان تنحفظ هني.",
@@ -2735,8 +2744,6 @@ Object.assign(AR, {
   "Top Saudi result": "أفضل نتيجة سعودية", "Romania Muscle Fest Pro 2026 · Nov 7–8, 2026": "رومانيا مسل فيست برو 2026 · 7–8 نوفمبر 2026", "Ahmed Juraybi · 1st": "أحمد الجريبي · الأول",
   "Results": "النتائج", "News": "الأخبار", "1st": "الأول", "2nd": "الثاني", "3rd": "الثالث", "4th": "الرابع", "5th": "الخامس", "6th": "السادس", "7th": "السابع", "8th": "الثامن", "9th": "التاسع", "10th": "العاشر", "Pro card": "كرت المحترفين", "Events, results, athletes, news": "بطولات، نتائج، لاعبين، أخبار"
 });
-AR_RX.push([/^Starts in (\d+) days$/, (m, n) => `تبدأ بعد ${n} يوم`]);
-AR_RX.push([/^(\d+) days$/, (m, n) => `${n} يوم`]);
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
 AR_RX.push([/^(.+) Pro (\d{4})$/, (m, a, y) => (AR[a] ? `${AR[a]} برو ${y}` : m)]);
