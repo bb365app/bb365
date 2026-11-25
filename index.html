@@ -176,6 +176,16 @@ img{display:block}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow-y:auto;background:var(--s1);border-radius:26px 26px 0 0;border-top:1px solid var(--line);z-index:21;padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .25s ease-out}
 @keyframes fade{from{opacity:0}}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
+#toast.top{top:calc(env(safe-area-inset-top,0px) + 16px);bottom:auto}
+.next-ev{position:relative;border-radius:22px;overflow:hidden;border:1px solid #4A3C16;background:var(--s2);display:flex;flex-direction:column;gap:14px;padding:18px;min-height:280px;justify-content:flex-end;isolation:isolate}
+.next-ev>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.next-ev::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 48%,#000 100%)}
+.next-t{font-weight:800;font-size:32px;line-height:1;text-transform:uppercase;display:block;margin-top:8px}
+.cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cd div{background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:12px;padding:8px 2px;text-align:center}
+.cd b{display:block;font-family:var(--display);font-size:28px;line-height:1.05;color:var(--gold-2);font-variant-numeric:tabular-nums}
+.cd span{font-size:11px;color:var(--muted)}
+.seg.tight button{padding:0 12px;font-size:13px}
 #toast{position:absolute;left:20px;right:20px;bottom:92px;z-index:30;display:flex;justify-content:center;pointer-events:none}
 #toast div{background:#F4F3EF;color:#111;font-weight:600;padding:12px 16px;border-radius:14px;box-shadow:0 8px 30px #000A;animation:up .2s}
 .note{font-size:12px;color:var(--muted);line-height:1.5;text-align:center;padding:0 24px}
@@ -538,7 +548,7 @@ const evSort = (list) => list.slice().sort((a, b) => (ST_RANK[a.status] - ST_RAN
 
 const CN = { kw: { en: "Kuwait", ar: "الكويت", cur: "Kuwaiti dinar (KD)" }, sa: { en: "Saudi Arabia", ar: "السعودية", cur: "Saudi riyal (SAR)" } };
 const localFirst = (list) => list.filter((x) => x.date !== "Date not announced").sort((a, b) => ((b.country === S.country) - (a.country === S.country)) || (!!b.country - !!a.country) || ((a.start || 0) - (b.start || 0)));
-const homeEv = () => { const up = shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now()).sort((a, b) => a.start - b.start); return up.find((e) => e.country === S.country) || up[0] || EVENTS[0]; };
+const homeEv = () => { const up = shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now() && e.date !== "Date not announced").sort((a, b) => a.start - b.start); return up.find((e) => e.country === S.country) || up.find((e) => e.country) || up[0] || null; };
 const CATS = [
   { id: "open", name: "Men's Open", desc: "Open weight class, all heights" },
   { id: "classic", name: "Classic Physique", desc: "Height-to-weight limits apply" },
@@ -642,16 +652,16 @@ const S = {
     return "kw"; })(),
   user: saved.user && typeof saved.user === "object" && saved.user.phone ? saved.user : null, suDone: !!saved.suDone, langSet: !!saved.langSet || (!!saved.lang && !!saved.suDone),
   su: { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} },
-  regs: (Array.isArray(saved.regs) ? saved.regs : []).filter((r) => r && EV(r.event)), follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: {},
+  regs: (Array.isArray(saved.regs) ? saved.regs : []).filter((r) => r && EV(r.event)), follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: saved.remind && typeof saved.remind === "object" ? saved.remind : {},
   filter: "all", liveCat: "open", evTab: "overview", evCat: "open", shopCat: "supplements", cart: {}, sheet: null,
   alerts: { start: true, results: true }, vote: null, reg: null,
-  body: Object.assign({ sex: "m", age: "", weight: "", height: "", bf: "", act: "1.55", goal: "1" }, saved.body || {}),
+  body: Object.assign({ age: "", weight: "", height: "", bf: "", act: "1.55", goal: "1" }, saved.body || {}, { sex: "m" }),
   wk: { prog: "coach", day: (new Date().getDay() + 6) % 7, done: saved.wkdone || {} }, fact: 0, factCat: "all", meals: 4,
   prep: Object.assign({ date: "", weight: "", stage: "" }, saved.prep || {}), log: Array.isArray(saved.log) ? saved.log : [], org: saved.org || {}, orgF: "all",
   tickets: (Array.isArray(saved.tickets) ? saved.tickets : []).filter((t) => t && EV(t.event)), lang: saved.lang === "ar" ? "ar" : "en", coach: Object.assign({ goal: "muscle", level: "inter", days: 4, mins: 60, equip: "gym", focus: [], avoid: [] }, saved.coach || {}), coachPlan: saved.coachPlan || null, photos: Array.isArray(saved.photos) ? saved.photos : [], groups: saved.groups || null, picks: saved.picks && typeof saved.picks === "object" ? saved.picks : {}, predOut: !!saved.predOut, seen: saved.seen || {}, tk: null, tkFresh: null, rankDiv: "open",
   orm: { w: "", r: "" }, fat: { neck: "", waist: "", hip: "" }, logIn: { w: "", d: new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10) }, s: { q: "" }
 };
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ langSet: S.langSet, user: S.user, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut })); } catch (e) {} };
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ langSet: S.langSet, user: S.user, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut, remind: S.remind })); } catch (e) {} };
 const spotsTaken = (e) => e.taken + S.regs.filter((r) => r.event === e.id).length;
 const newReg = (eventId) => ({ event: eventId, step: 1, busy: false, pay: "knet", photo: null, errors: {},
   data: { category: "", name: "", dob: "", nat: "Kuwait", phone: "", email: "", height: "", weight: "", club: "Independent", ig: "", rules: false, fit: false } });
@@ -722,7 +732,7 @@ const TOP = { kicker: "Top story · Olympia 2026", title: "Nick Walker wins the 
   note: "Dauda won Saturday's finals, but Walker's lead from prejudging decided the title.",
   url: "https://fitnessvolt.com/2026-mr-olympia-scorecard-explained/", src: FV };
 const RESULTS = [
-  { ev: "Romania Muscle Fest Pro 2026", when: "Bucharest · Nov 7–8, 2026", wins: [["Men's Open", "Ahmed Juraybi · Saudi Arabia"], ["212", "Roman Iushchenko"], ["Classic Physique", "Piotr Wojtowicz"]], url: "https://generationiron.com/2026-romania-muscle-fest-pro-results/", src: GI },
+  { ev: "Romania Muscle Fest Pro 2026", when: "Bucharest · Nov 7–8, 2026", sa: true, wins: [["Men's Open", "Ahmed Juraybi · Saudi Arabia"], ["212", "Roman Iushchenko"], ["Classic Physique", "Piotr Wojtowicz"]], url: "https://generationiron.com/2026-romania-muscle-fest-pro-results/", src: GI },
   { ev: "Kuwait Pro 2026", when: "Kuwait City · Nov 6–7, 2026", local: true, wins: [["Classic Physique", "Levon Poghosyan · Armenia"], ["Men's Physique", "Michael Van Niekerk · South Africa"]], url: "https://fitnessvolt.com/2026-kuwait-pro-results/", src: FV },
   { ev: "Steve Karr Las Vegas Classic Pro 2026", when: "Las Vegas · posted Nov 8, 2026", wins: [["Classic Physique", "Robert Timms"]], url: "https://fitnessvolt.com/2026-steve-karr-las-vegas-classic-pro-results/", src: FV }
 ];
@@ -745,13 +755,22 @@ const topStory = () => `<div class="sec"><div class="story">
   <div class="pod">${TOP.pod.map(([p, n, pts], i) => `<div class="pod-row${i ? "" : " first"}"><span class="pl">${p}</span><b style="font-size:15px">${esc(n)}</b><span class="pts">${pts}<small> pts</small></span></div>`).join("")}</div>
   <div style="font-size:13px;line-height:1.5;color:#D8D8DE">${esc(TOP.note)} Lower score wins.</div>
   ${xl(TOP.url, TOP.src)}</div></div>`;
-const resCard = (r) => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(r.ev)}</b><div class="muted" style="font-size:12px;margin-top:2px">${esc(r.when)}</div></div>${r.local ? '<span class="chip gold">Kuwait</span>' : ""}</div>
+const resCard = (r) => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(r.ev)}</b><div class="muted" style="font-size:12px;margin-top:2px">${esc(r.when)}</div></div>${r.local ? '<span class="chip gold">Kuwait</span>' : r.sa ? '<span class="chip gold">Saudi Arabia</span>' : ""}</div>
   ${r.wins.map(([d, w]) => `<div class="win"><span class="muted">${esc(d)}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}${xl(r.url, r.src)}</div>`;
 const champsCard = () => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1"><b style="font-size:15px">2026 Olympia champions</b><div class="muted" style="font-size:12px;margin-top:2px">Las Vegas · Sep 24–27, 2026</div></div></div>
   <div class="champs">${CHAMPS.map(([d, w]) => `<div class="champ"><span>${esc(d)}</span><b>${esc(w)}</b></div>`).join("")}</div>${xl("https://fitnessvolt.com/2026-mr-olympia-results/", FV)}</div>`;
 const dramaCard = (x) => `<div class="drama"><div class="row" style="justify-content:space-between;gap:10px"><span class="chip live">${ic("flame", 12, 2)} ${esc(x.tag)}</span><span class="muted" style="font-size:12px">${esc(x.date)}</span></div>
   <div class="vs"><b class="n">${esc(x.a)}</b><i>VS</i><b class="n">${esc(x.b)}</b></div>
   <div><b style="font-size:16px;line-height:1.3">${esc(x.t)}</b><p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:#D8D8DE">${esc(x.d)}</p></div>${xl(x.url, x.src)}</div>`;
+const daysTo = (e) => { const n = Math.ceil((new Date(e.start).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 864e5); return n <= 0 ? "Today" : n === 1 ? "Tomorrow" : n + " days"; };
+const nextCard = () => { const e = homeEv(); if (!e) return "";
+  const on = !!S.remind[e.id];
+  return `<div class="sec"><div class="next-ev"><img src="${IMG[e.img]}" alt="">
+    <a href="#event-${e.id}" style="display:block"><span class="chip gold">Next event</span><b class="disp next-t">${esc(e.name)}</b><div class="muted" style="font-size:13px;margin-top:6px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></a>
+    <div class="cd" role="timer" aria-label="Time until it starts">${[["cd-d", "days"], ["cd-h", "hours"], ["cd-m", "min"], ["cd-s", "sec"]].map(([id, l]) => `<div><b id="${id}" data-keep>0</b><span>${l}</span></div>`).join("")}</div>
+    <div class="row g8"><a href="#event-${e.id}" class="btn gold sm" style="flex:1">See event</a><button class="btn line sm" style="flex:1" aria-pressed="${on}" data-act="remind" data-v="${e.id}">${ic("bell", 16)} ${on ? "Saved" : "Remind me"}</button></div></div></div>`; };
+const saCard = () => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">Top Saudi result</b><div class="muted" style="font-size:12px;margin-top:2px">Romania Muscle Fest Pro 2026 · Nov 7–8, 2026</div></div><span class="chip gold">Saudi Arabia</span></div>
+  <div class="win"><span class="muted">Men's Open</span><b style="text-align:end">Ahmed Juraybi · 1st</b></div>${xl("https://generationiron.com/2026-romania-muscle-fest-pro-results/", GI)}</div>`;
 const kwProCard = () => { const e = EV("kwpro26"); if (!e) return "";
   return `<a href="#event-kwpro26" class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></div><span class="chip gold">Kuwait</span></div>
   ${[["Classic Physique", e.res.classic[0][0] + " · " + e.res.classic[0][1]], ["Men's Physique", e.res.physique[0][0] + " · " + e.res.physique[0][1]], ["Top Kuwaiti", e.res.classic[2][0] + " · 3rd"]].map(([d, w]) => `<div class="win"><span class="muted">${d}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}</a>`; };
@@ -767,8 +786,10 @@ SCREENS.home = () => {
 
     <div class="seg" role="group" aria-label="Filter the feed">${[["all", "All"], ["results", "Results"], ["drama", "Drama"], ["news", "News"]].map(([k, l]) => `<button aria-pressed="${f === k}" data-act="feed" data-v="${k}">${l}</button>`).join("")}</div>
 
+    ${f === "all" ? nextCard() : ""}
+
     ${on("results") && !AUTO.res.length ? topStory() : ""}
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${S.country === "kw" ? kwProCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
+    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${S.country === "kw" ? kwProCard() : S.country === "sa" ? saCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
 
     ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
@@ -801,9 +822,10 @@ SCREENS.event = (id) => {
         <div class="fact"><span>Date</span><b>${esc(e.date)}</b></div>
         <div class="fact"><span>Venue</span><b>${esc(e.place)}</b></div>
         <div class="fact"><span>${e.real ? "Federation" : "Entry fee"}</span><b>${e.real ? esc(e.fed) : e.fee ? kd(e.fee) : "Free to watch"}</b></div>
-        <div class="fact"><span>${e.reg ? "Entry closes" : e.status === "upcoming" && !e.real ? "Opens" : "Status"}</span><b>${e.reg ? esc(e.deadline) : e.status === "upcoming" ? (e.real ? "Upcoming" : esc(e.opens)) : e.status === "live" ? "Live now" : "Finished"}</b></div>
+        <div class="fact"><span>${e.reg ? "Entry closes" : e.status === "upcoming" && !e.real ? "Opens" : e.status === "upcoming" && e.start && e.date !== "Date not announced" ? "Starts in" : "Status"}</span><b>${e.reg ? esc(e.deadline) : e.status === "upcoming" ? (e.real ? (e.start && e.date !== "Date not announced" ? daysTo(e) : "Upcoming") : esc(e.opens)) : e.status === "live" ? "Live now" : "Finished"}</b></div>
       </div>
       ${e.reg ? `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="row" style="justify-content:space-between"><b>Entries</b><span class="muted">${taken} / ${e.spots}</span></div><div class="bar"><i style="width:${Math.round(taken / e.spots * 100)}%"></i></div><div class="muted" style="font-size:12px">${e.spots - taken} spots left. Entries are reviewed before they are approved.</div></div>` : ""}
+      ${e.status === "upcoming" && e.start && e.date !== "Date not announced" ? `<button class="btn line block" data-act="ics" data-v="${e.id}">${ic("calendar", 18)} Add to calendar</button>` : ""}
       <div style="display:flex;flex-direction:column;gap:8px"><h3 class="disp" style="font-size:22px;text-transform:uppercase">About</h3><p style="line-height:1.6;color:#C9C9D1">${esc(e.about)}</p>${e.url ? xl(e.url, e.src) : ""}</div>
       ${e.status !== "finished" && !e.real ? `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px"><div><b>Fan poll</b><div class="muted" style="font-size:12px;margin-top:2px">Who takes Men's Open?${S.vote ? "" : " Vote to see the results."}</div></div>
         ${POLL.map(([n, v]) => { const total = 100 + (S.vote ? 1 : 0); const val = Math.round(v + (S.vote === n ? 1 : 0)); return S.vote
@@ -826,14 +848,14 @@ SCREENS.event = (id) => {
   const cta = e.reg
     ? (mine ? `<a href="#register-${e.id}" class="btn gold" style="flex:1">${ic("check")} Registered · View pass</a>`
             : `<a href="#register-${e.id}" class="btn gold" style="flex:1;white-space:nowrap">${e.tickets ? "Register" : "Register now"} · ${kd(e.fee)}</a>`)
-    : e.real && e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" class="btn gold" style="flex:1">${ic("ext", 18)} Official page</a>`
+    : e.real && e.url ? `<a href="${/^https:\/\//.test(e.url) ? esc(e.url) : "#"}" target="_blank" rel="noopener" class="btn gold" style="flex:1">${ic("ext", 18)} Official page</a>${e.status === "upcoming" ? `<button class="btn line" style="flex:1" aria-pressed="${!!S.remind[e.id]}" data-act="remind" data-v="${e.id}">${ic("bell", 18)} ${S.remind[e.id] ? "Saved" : "Remind me"}</button>` : ""}`
     : e.status === "upcoming" ? `<button class="btn line" style="flex:1" data-act="remind" data-v="${e.id}">${ic("bell", 18)} ${S.remind[e.id] ? "Reminder on" : "Remind me when it opens"}</button>` : e.status === "live" ? `<a href="#predict" class="btn gold" style="flex:1">${ic("trophy", 18)} Predict the winners</a>` : "";
   return `
   <div class="scroll view-in" style="gap:20px;padding-bottom:24px">
     <div class="cover" style="height:300px"><img src="${IMG[e.img]}" alt="">
-      <div class="cover-top"><a href="#events" class="ibtn glass" aria-label="Back to events">${ic("back")}</a><button class="ibtn glass" aria-label="Save event" data-act="toast" data-v="Saved to your events">${ic("bookmark")}</button></div>
+      <div class="cover-top"><a href="#events" class="ibtn glass" aria-label="Back to events">${ic("back")}</a>${e.status === "finished" ? "" : `<button class="ibtn glass" aria-label="Save event" aria-pressed="${!!S.remind[e.id]}" data-act="remind" data-v="${e.id}" style="${S.remind[e.id] ? "color:var(--gold-2);border-color:var(--gold)" : ""}">${ic("bookmark")}</button>`}</div>
       <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;flex-direction:column;gap:8px"><div>${evChip(e)}</div><h1 class="disp" tabindex="-1" data-focus style="font-weight:800;font-size:38px;line-height:1;text-transform:uppercase">${esc(e.name)}</h1><div class="pc-sub">${ic("pin", 14)}<span>${esc(e.place)} · ${esc(e.date)}</span></div></div></div>
-    <div class="seg" role="tablist" aria-label="Event sections">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${S.evTab === k}" aria-pressed="${S.evTab === k}" data-act="evTab" data-v="${k}">${l}</button>`).join("")}</div>
+    <div class="seg tight" role="tablist" aria-label="Event sections">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${S.evTab === k}" aria-pressed="${S.evTab === k}" data-act="evTab" data-v="${k}">${l}</button>`).join("")}</div>
     ${streamBlock(e)}
     <div class="sec" style="gap:16px">${body}</div>
   </div>${cta ? `<div class="cta">${cta}${e.tickets ? `<a href="#tickets-${e.id}" class="btn line">${ic("ticket", 18)} Tickets</a>` : ""}</div>` : ""}`;
@@ -841,7 +863,7 @@ SCREENS.event = (id) => {
 
 SCREENS.athletes = () => `
   <div class="scroll view-in">
-    <div class="top"><h1 class="title" tabindex="-1" data-focus>Athletes</h1><a href="#home" class="ibtn" aria-label="Back to home">${ic("close")}</a></div>
+    <div class="top"><h1 class="title" tabindex="-1" data-focus>Athletes</h1></div>
     <div class="sec"><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 240)).join("")}</div>
     <p class="note">Photos and details are added with each athlete’s permission.</p></div>
   </div>${tabbar("home")}`;
@@ -983,7 +1005,7 @@ SCREENS.profile = () => {
     <div class="sec"><div class="sec-h"><h2>Following</h2></div>
       ${following.length ? `<div class="grid2">${following.map((id) => athCard(ATH[id], 180)).join("")}</div>` : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">Follow athletes to get their results first.</div>`}</div>
 
-    <div class="sec"><div class="sec-h"><h2>Organizer view</h2></div><a href="#organizer" class="rowcard">${ic("shield", 22)}<div style="flex:1"><b>Review entries</b><div class="muted" style="font-size:12px;margin-top:2px">Demo of what tournament organizers see</div></div>${ic("chev", 18)}</a></div>
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>My events</h2></div>${shownEvents().filter((e) => S.remind[e.id]).length ? shownEvents().filter((e) => S.remind[e.id]).sort((a, b) => a.start - b.start).map((x) => `<a href="#event-${x.id}" class="slim"><img src="${IMG[x.img]}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="flex:1;min-width:0"><b style="display:block;font-size:15px">${esc(x.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(x.place)}</span> · <span>${esc(x.date)}</span></div></div>${ic("chev", 18)}</a>`).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">Tap the bookmark on an event to save it here.</div>`}</div>
 
     <div class="sec" style="gap:12px"><div class="sec-h"><h2>Language</h2></div>
       <div class="seg" role="group" aria-label="Language" style="padding:0"><button aria-pressed="${S.lang !== "ar"}" data-act="lang" data-v="en">English</button><button aria-pressed="${S.lang === "ar"}" data-act="lang" data-v="ar" style="font-family:'Noto Kufi Arabic',var(--body)">العربية</button></div></div>
@@ -1019,7 +1041,6 @@ const bodyForm = (withGoal) => {
   const b = S.body;
   const f = (k, l, ph, extra) => `<div class="field"><label for="b-${k}">${l}</label><input class="input" id="b-${k}" data-b="${k}" type="number" inputmode="decimal" placeholder="${ph}" value="${esc(b[k])}" ${extra || ""}></div>`;
   return `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:14px">
-    <div class="field"><span class="lbl">Sex</span><div class="two" role="group" aria-label="Sex">${[["m", "Male"], ["f", "Female"]].map(([k, l]) => `<button class="btn sm ${b.sex === k ? "gold" : "line"}" aria-pressed="${b.sex === k}" data-act="sex" data-v="${k}">${l}</button>`).join("")}</div></div>
     <div class="two">${f("age", "Age", "28", 'min="15" max="90"')}${f("weight", "Weight (kg)", "95", 'min="30" max="250"')}</div>
     <div class="two">${f("height", "Height (cm)", "178", 'min="120" max="230"')}${f("bf", "Body fat % (optional)", "12", 'min="3" max="60"')}</div>
     <div class="field"><label for="b-act">Activity level</label><select class="input" id="b-act" data-b="act">${ACTS.map(([v, l, s]) => `<option value="${v}"${b.act === v ? " selected" : ""}>${l} · ${s}</option>`).join("")}</select></div>
@@ -1044,7 +1065,7 @@ function bodyOut(kind) {
 }
 SCREENS.tools = () => `
   <div class="scroll view-in">
-    <div class="top"><h1 class="title" tabindex="-1" data-focus>Tools</h1><a href="#home" class="ibtn" aria-label="Back to home">${ic("close")}</a></div>
+    <div class="top"><h1 class="title" tabindex="-1" data-focus>Tools</h1></div>
     ${TOOLS_LAYOUT === "featured" ? `<div class="sec">${toolTile(TOOLS[0], true)}</div><div class="sec"><div class="tgrid">${TOOLS.slice(1).map((t) => toolTile(t)).join("")}</div></div>`
       : `<div class="sec"><div class="tgrid">${TOOLS.map((t) => toolTile(t)).join("")}</div></div>`}
   </div>${tabbar("tools")}`;
@@ -1244,7 +1265,6 @@ GOUT.bodyfat = () => {
 SCREENS.bodyfat = () => `
   <div class="scroll view-in">${toolHead("Body fat estimate")}
     <div class="sec" style="gap:18px"><p class="muted" style="line-height:1.5">Estimate body fat from tape measurements. Measure relaxed, at the same spots each time.</p>
-      <div class="field"><span class="lbl">Sex</span><div class="two" role="group" aria-label="Sex">${[["m", "Male"], ["f", "Female"]].map(([k, l]) => `<button class="btn sm ${S.body.sex === k ? "gold" : "line"}" aria-pressed="${S.body.sex === k}" data-act="sex" data-v="${k}">${l}</button>`).join("")}</div></div>
       <div class="two">${gin("body", "height", "Height (cm)", 'type="number" inputmode="decimal" placeholder="178"')}${gin("body", "weight", "Weight (kg, optional)", 'type="number" inputmode="decimal" placeholder="95"')}</div>
       <div class="two">${gin("fat", "neck", "Neck (cm)", 'type="number" inputmode="decimal" placeholder="40"', "Below the larynx")}${gin("fat", "waist", "Waist (cm)", 'type="number" inputmode="decimal" placeholder="85"', "At the navel")}</div>
       ${S.body.sex === "f" ? gin("fat", "hip", "Hip (cm)", 'type="number" inputmode="decimal" placeholder="98"', "At the widest point") : ""}
@@ -1282,18 +1302,23 @@ SCREENS.organizer = () => {
 GOUT.search = () => {
   const q = S.s.q.trim().toLowerCase();
   if (!q) return `<div class="muted" style="margin-bottom:10px">Try one of these:</div><div class="seg" style="padding:0;flex-wrap:wrap;overflow:visible">${["Kuwait", "Olympia", "Riyadh", "Protein", "Calories"].map((s) => `<button data-act="searchSet" data-v="${s}" aria-pressed="false">${s}</button>`).join("")}</div>`;
-  const has = (...t) => t.join(" ").toLowerCase().includes(q);
+  const has = (...t) => t.map((x) => x + " " + T(String(x))).join(" ").toLowerCase().includes(q);
+  const resHits = []; shownEvents().filter((e) => e.res).forEach((e) => Object.entries(e.res).forEach(([d, rows]) => rows.forEach(([n], i) => { if (has(n)) resHits.push(["#event-" + e.id, n, (e.resKind === "procards" ? "Pro card" : ordEn(i + 1)) + " · " + (DIV_NAMES[d] || d) + " · " + e.name, e.img]); })));
+  RESULTS.forEach((r) => r.wins.forEach(([d, w]) => { if (has(w.split(" · ")[0])) resHits.push([r.url, w.split(" · ")[0], "1st · " + d + " · " + r.ev, null]); }));
+  const newsHits = [...AUTO.res, ...AUTO.drama, ...NEWS].filter((n, i, a) => a.findIndex((x) => x.url === n.url) === i && has(n.t, n.ar || "")).map((n) => [n.url, S.lang === "ar" && n.ar ? n.ar : n.t, (n.src || FV) + " · " + n.date, null]);
   const groups = [
     ["Events", shownEvents().filter((e) => has(e.name, e.place)).map((e) => ["#event-" + e.id, e.name, e.place + " · " + e.date, e.img])],
+    ["Results", resHits],
     ["Athletes", ATH_IDS.map((id) => ATH[id]).filter((a) => has(a.name, a.handle, a.country || "")).map((a) => ["#athlete-" + a.id, a.name, a.handle, a.photo])],
+    ["News", newsHits],
     ["Tools", TOOLS.filter((t) => has(t.name, t.s || t.sub || "")).map((t) => ["#" + t.id, t.name, t.s || t.sub || "", t.img])]
   ].filter((g) => g[1].length);
   if (!groups.length) return fEmpty("Nothing found for “" + esc(S.s.q.trim()) + "”. Try a shorter word.");
-  return groups.map(([t, items]) => `<div style="display:flex;flex-direction:column;gap:8px"><h3 class="disp" style="font-size:20px;text-transform:uppercase;letter-spacing:.04em">${t}</h3>${items.slice(0, 6).map(([h, n, s, im]) => `<a href="${h}" class="rowcard"><span style="flex:none;width:48px;height:48px;border-radius:12px;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--gold)">${im ? `<img src="${IMG[im]}" alt="" style="width:100%;height:100%;object-fit:cover">` : ic("user", 22)}</span><span style="flex:1;min-width:0"><b dir="auto" style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">${esc(s)}</span></span>${ic("chev", 18)}</a>`).join("")}</div>`).join("");
+  return groups.map(([t, items]) => `<div style="display:flex;flex-direction:column;gap:8px"><h3 class="disp" style="font-size:20px;text-transform:uppercase;letter-spacing:.04em">${t}</h3>${items.slice(0, 6).map(([h, n, s, im]) => `<a href="${esc(h)}" class="rowcard"${h[0] === "#" ? "" : ' target="_blank" rel="noopener"'}><span style="flex:none;width:48px;height:48px;border-radius:12px;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--gold)">${im ? `<img src="${IMG[im]}" alt="" style="width:100%;height:100%;object-fit:cover">` : ic(h[0] === "#" ? "user" : "news", 22)}</span><span style="flex:1;min-width:0"><b dir="auto" style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">${esc(s)}</span></span>${ic("chev", 18)}</a>`).join("")}</div>`).join("");
 };
 SCREENS.search = () => `
   <div class="scroll view-in"><div class="toolhead"><a href="#home" class="ibtn" aria-label="Back to home">${ic("back")}</a><h1 tabindex="-1" data-focus>Search</h1><span style="width:44px"></span></div>
-    <div class="sec" style="gap:16px"><div class="field"><label for="g-s-q" class="vh">Search BB365</label><input class="input" id="g-s-q" data-g="s.q" type="search" placeholder="Events, athletes, tools" autocomplete="off" enterkeyhint="search" value="${esc(S.s.q)}"></div>
+    <div class="sec" style="gap:16px"><div class="field"><label for="g-s-q" class="vh">Search BB365</label><input class="input" id="g-s-q" data-g="s.q" type="search" placeholder="Events, results, athletes, news" autocomplete="off" enterkeyhint="search" value="${esc(S.s.q)}"></div>
       <div id="g-out" data-o="search" aria-live="polite" style="display:flex;flex-direction:column;gap:18px">${GOUT.search()}</div></div>
   </div>${tabbar("home")}`;
 
@@ -1360,6 +1385,8 @@ function notifs() {
       t: st === "approved" ? "Your entry was approved" : st === "rejected" ? "Your entry was not approved" : "We received your entry", d: `${e.name} · ${r.number}`, h: `#register-${r.event}`, when: r.date }); });
   S.tickets.slice().reverse().forEach((t) => { const e = EV(t.event); const tier = TIERS.find((x) => x.id === t.tier);
     out.push({ id: `tk-${t.id}`, ic: "ticket", tone: "ok", t: "Ticket confirmed", d: `${tier.name} × ${t.qty} · ${e.name}`, h: `#ticket-${t.id}`, when: t.date }); });
+  shownEvents().filter((e) => S.remind[e.id] && e.status !== "finished").sort((a, b) => a.start - b.start).forEach((e) => { const dt = e.date !== "Date not announced" ? daysTo(e) : ""; const soon = /^(Today|Tomorrow|[1-7] days)$/.test(dt);
+    out.push({ id: `sv-${e.id}-${soon ? dt : "later"}`, ic: "bell", tone: soon ? "live" : "gold", t: e.status === "live" ? "Live now" : soon ? "Starts in " + dt : "Saved event", d: `${e.name} · ${e.date}`, h: `#event-${e.id}`, when: "Your events" }); });
   out.push({ id: "r-saudi", ic: "calendar", tone: "gold", t: "Saudi Arabia Pro is on Dec 5–6 in Riyadh", d: "212, Classic Physique and Men's Physique.", h: "#event-saudipro", when: "Upcoming" });
   out.push({ id: "r-kw", ic: "trophy", tone: "ok", t: "Kuwait Pro 2026 results are final", d: "Poghosyan won Classic Physique, Van Niekerk won Men's Physique.", h: "#event-kwpro26", when: "Results" });
   out.push({ id: "r-uk", ic: "calendar", tone: "gold", t: "Arnold Classic UK 2027 is Mar 19–21", d: "At the NEC in Birmingham.", h: "#event-arnolduk27", when: "Upcoming" });
@@ -1373,7 +1400,7 @@ SCREENS.alerts = () => {
   <div class="scroll view-in"><div class="toolhead"><a href="#home" class="ibtn" aria-label="Back to home">${ic("back")}</a><h1 tabindex="-1" data-focus>Alerts</h1><span style="width:44px"></span></div>
     <div class="sec" style="gap:10px"><div class="row" style="justify-content:space-between;min-height:44px"><span class="muted" aria-live="polite">${un ? un + " new" : "All caught up"}</span>${un ? `<button class="link" style="background:none;border:0" data-act="readAll" data-v="">Mark all as read</button>` : ""}</div>
       ${list.map((n) => `<a href="${n.h}" class="rowcard" style="align-items:flex-start;${S.seen[n.id] ? "" : "border-color:#4A3C16"}"><span class="chip ${n.tone}" style="padding:8px;flex:none">${ic(n.ic, 18)}</span><div style="flex:1;min-width:0"><b style="line-height:1.3">${esc(n.t)}</b><div class="muted" style="font-size:12px;margin-top:3px;line-height:1.4">${esc(n.d)}</div><div class="muted" style="font-size:11px;margin-top:4px;letter-spacing:.08em;text-transform:uppercase">${esc(n.when)}</div></div>${S.seen[n.id] ? "" : `<span class="chip gold">New</span>`}</a>`).join("")}
-      <p class="note" style="padding:0">Alerts about your entries and tickets appear here when an organizer reviews them.</p></div>
+      <p class="note" style="padding:0">Save an event with the bookmark and its reminder shows here.</p></div>
   </div>${tabbar("home")}`;
 };
 
@@ -1525,7 +1552,7 @@ function validate(step) {
   return er;
 }
 function toast(msg) {
-  const t = document.getElementById("toast"); t.innerHTML = `<div>${esc(msg)}</div>`;
+  const t = document.getElementById("toast"); t.classList.toggle("top", !S.langSet || route()[0] === "lang"); t.innerHTML = `<div>${esc(msg)}</div>`;
   clearTimeout(toast.t); toast.t = setTimeout(() => { t.innerHTML = ""; }, 2400);
 }
 function readPhoto(file) {
@@ -1537,7 +1564,10 @@ function readPhoto(file) {
 }
 const ACT = {
   filter: (v) => { S.filter = v; }, evTab: (v) => { S.evTab = v; }, evCat: (v) => { S.evCat = v; },
-  vote: (v) => { S.vote = v; }, remind: (v) => { S.remind[v] = !S.remind[v]; toast(S.remind[v] ? "We will remind you" : "Reminder removed"); },
+  vote: (v) => { S.vote = v; }, remind: (v) => { if (S.remind[v]) delete S.remind[v]; else S.remind[v] = 1; persist(); toast(S.remind[v] ? "Saved. Reminders show in Alerts." : "Removed from your events"); },
+  ics: (v) => { const e = EV(v); if (!e || !e.start) return; const d = (x) => isoD(x).replace(/-/g, ""); const end = new Date(e.endIso ? e.endIso + "T12:00" : e.start); end.setDate(end.getDate() + 1);
+    const txt = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//BB365//EN", "BEGIN:VEVENT", "UID:" + e.id + "@bb365", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z", "DTSTART;VALUE=DATE:" + d(e.start), "DTEND;VALUE=DATE:" + d(end), "SUMMARY:" + e.name, "LOCATION:" + e.place.replace(/,/g, "\\,"), "DESCRIPTION:" + (e.url || ""), "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/calendar" })); a.download = e.id + ".ics"; document.body.appendChild(a); a.click(); a.remove(); },
   toast: (v) => toast(v),
   logAdd: () => { const w = num(S.logIn.w), d = S.logIn.d; if (!(w >= 30 && w <= 250)) { toast("Enter a weight from 30 to 250 kg"); return; } if (!d) { toast("Pick a date"); return; }
     S.log = S.log.filter((x) => x.d !== d); S.log.push({ d, w: Math.round(w * 10) / 10 }); S.log.sort((a, b) => (a.d < b.d ? -1 : 1)); S.logIn.w = ""; persist(); toast("Saved"); },
@@ -1659,7 +1689,8 @@ window.addEventListener("hashchange", () => render(false));
 
 function tick() {
   const el = document.getElementById("cd-d"); if (!el) return;
-  let ms = Math.max(0, homeEv().start.getTime() - Date.now());
+  const he = homeEv(); if (!he) return;
+  let ms = Math.max(0, he.start.getTime() - Date.now());
   const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 36e5); ms -= h * 36e5; const m = Math.floor(ms / 6e4); ms -= m * 6e4; const s = Math.floor(ms / 1e3);
   const two = (n) => String(n).padStart(2, "0");
   el.textContent = d; document.getElementById("cd-h").textContent = two(h); document.getElementById("cd-m").textContent = two(m); document.getElementById("cd-s").textContent = two(s);
@@ -1810,8 +1841,7 @@ const mkGroup = (id, name, code, type, dur, friends, msgs) => {
   const now = Date.now();
   return { id, name, code, type, dur, start: monday(), me: { n: 0, days: [] }, mem: friends, feed: msgs.map(([w, k, d]) => [w, k, now - d * 864e5]) };
 };
-if (!Array.isArray(S.groups)) S.groups = [mkGroup("g1", "Gym Boys", "BB-7Q4K", "workouts", 7, [["Salem", 5], ["Fahad", 4], ["Yousef", 3], ["Abdullah", 2]],
-  [["Salem", "log", 0], ["Fahad", "msg:Leg day done. Your move.", 0], ["Yousef", "log", 1], ["Abdullah", "msg:Gym at 9 tonight?", 1], ["Salem", "msg:New PR on bench today", 2]])];
+if (!Array.isArray(S.groups)) S.groups = [];
 S.gNew = S.gNew || { name: "", type: "workouts", dur: 7, code: "" };
 const gScore = (g) => {
   if (g.type === "streak") { const d = new Date(); if (!g.me.days.includes(isoD(d))) d.setDate(d.getDate() - 1); let n = 0; while (g.me.days.includes(isoD(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
@@ -1913,7 +1943,7 @@ const pdRows = () => [["You", pdMine(), true], ...PD_FR.map(([n, a, b]) => [n, a
 const pdRank = () => { const r = pdRows(); return [r.findIndex((x) => x[2]) + 1, r.length]; };
 const pdDone = () => Object.keys(PRED).filter((c) => pdPick(c).length === 3).length;
 SCREENS.predict = () => {
-  const e = EV("saudipro") || homeEv(); const c = PD_ORDER.includes(S.predCat) ? S.predCat : "classic"; const st = pdState(c); const P = PRED[c]; const pick = pdPick(c);
+  const e = homeEv() || EV("olympia26"); const c = PD_ORDER.includes(S.predCat) ? S.predCat : "classic"; const st = pdState(c); const P = PRED[c]; const pick = pdPick(c);
   const cn = CATS.find((x) => x.id === c).name; const [rk, of] = pdRank();
   const chip = st === "open" ? '<span class="chip gold">Open</span>' : st === "locked" ? '<span class="chip live">Locked</span>' : '<span class="chip ok">Final</span>';
   const top3 = (rows) => rows.slice(0, 3).map(([n, cc], i) => `<div class="rowcard"><div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;font-size:12px">${cc}</span></div>`).join("");
@@ -2642,7 +2672,7 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
       const same = old.find((e) => e.start && e.start.toDateString() === start.toDateString() && e.place.split(",")[0].toLowerCase() === String(x.place).split(",")[0].toLowerCase());
       EVENTS.push({ auto: true, real: true, reg: false, fee: 0, spots: 0, taken: 0, status: endD < new Date() ? "finished" : start <= new Date() ? "live" : "upcoming", fed: "IFBB Pro League", url: /^https:\/\//.test(j.source || "") ? j.source : "https://www.ifbbpro.com/schedule/", src: "IFBB Pro League schedule",
         id: same ? same.id : String(x.id), name: x.name, date: String(x.date), place: String(x.place), start, divs: x.divs.filter((d) => DIV_NAMES[d]),
-        img: same ? same.img : coverFor(x.place), country: /saudi/i.test(x.place) ? "sa" : /kuwait/i.test(x.place) ? "kw" : "", about: String(x.about || "") });
+        endIso: /^\d{4}-\d\d-\d\d$/.test(x.end || "") ? x.end : "", img: same ? same.img : coverFor(x.place), country: /saudi/i.test(x.place) ? "sa" : /kuwait/i.test(x.place) ? "kw" : "", about: String(x.about || "") });
     });
     if (["events", "home", "event", "predict", "search"].includes(route()[0])) render(true);
   } catch (e) {}
@@ -2678,6 +2708,17 @@ Object.assign(AR, {
   "Ali Bilal": "علي بلال", "Brandon Hendrickson": "براندون هندريكسون", "Erin Banks": "إيرين بانكس", "Kyron Holden": "كايرون هولدن",
   "Andrew Jacked": "أندرو جاكد", "Tonio Burton": "تونيو بيرتون"
 });
+Object.assign(AR, {
+  "Next event": "البطولة الجاية", "days": "يوم", "hours": "ساعة", "min": "دقيقة", "sec": "ثانية", "Time until it starts": "الوقت الباقي على البداية",
+  "See event": "شوف البطولة", "Remind me": "ذكّرني", "Saved": "محفوظة", "Saved. Reminders show in Alerts.": "انحفظت. التذكير يطلع لك في التنبيهات.", "Removed from your events": "انشالت من بطولاتك",
+  "Add to calendar": "أضف للتقويم", "Starts in": "تبدأ بعد", "Today": "اليوم", "Tomorrow": "باجر", "Live now": "مباشر الحين", "Saved event": "بطولة محفوظة", "Your events": "بطولاتك",
+  "My events": "بطولاتي", "Tap the bookmark on an event to save it here.": "اضغط علامة الحفظ في أي بطولة عشان تنحفظ هني.",
+  "Save an event with the bookmark and its reminder shows here.": "احفظ أي بطولة بعلامة الحفظ ويطلع لك تذكيرها هني.",
+  "Top Saudi result": "أفضل نتيجة سعودية", "Romania Muscle Fest Pro 2026 · Nov 7–8, 2026": "رومانيا مسل فيست برو 2026 · 7–8 نوفمبر 2026", "Ahmed Juraybi · 1st": "أحمد الجريبي · الأول",
+  "Results": "النتائج", "News": "الأخبار", "1st": "الأول", "2nd": "الثاني", "3rd": "الثالث", "4th": "الرابع", "5th": "الخامس", "6th": "السادس", "7th": "السابع", "8th": "الثامن", "9th": "التاسع", "10th": "العاشر", "Pro card": "كرت المحترفين", "Events, results, athletes, news": "بطولات، نتائج، لاعبين، أخبار"
+});
+AR_RX.push([/^Starts in (\d+) days$/, (m, n) => `تبدأ بعد ${n} يوم`]);
+AR_RX.push([/^(\d+) days$/, (m, n) => `${n} يوم`]);
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
 AR_RX.push([/^(.+) Pro (\d{4})$/, (m, a, y) => (AR[a] ? `${AR[a]} برو ${y}` : m)]);
