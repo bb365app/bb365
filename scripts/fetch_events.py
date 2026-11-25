@@ -81,7 +81,10 @@ def parse(page):
             raw_name = text(re.sub(r"<div>.*?</div>", "", cells[0], flags=re.S))
             classes = text(re.search(r"<div>(.*?)</div>", cells[0], re.S).group(1)) if "<div>" in cells[0] else "OPEN"
             name, year = nice_name(raw_name)
-            d = parse_dates(text(cells[1]), year)
+            try:
+                d = parse_dates(text(cells[1]), year)
+            except ValueError:  # an impossible date on the page (for example "Feb 30")
+                d = None
             if not d:
                 continue
             place = text(cells[2])
@@ -142,7 +145,12 @@ def main():
         return
     updated = re.search(r"Last Updated:</strong>\s*([A-Za-z]+ \d{1,2}, \d{4})", page)
     data = {"source": URL, "pageUpdated": updated.group(1) if updated else "", "events": events}
-    old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
+    try:
+        old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
+    except ValueError:
+        old = {}
+    if not isinstance(old, dict):
+        old = {}
     if old.get("events") == events:
         print(f"No schedule change ({len(events)} shows).")
         return

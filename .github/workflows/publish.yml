@@ -33,9 +33,11 @@ jobs:
           python-version: "3.12"
 
       - name: Fetch the latest bodybuilding news
+        continue-on-error: true
         run: python scripts/fetch_news.py
 
       - name: Fetch the official pro schedule
+        continue-on-error: true
         run: python scripts/fetch_events.py
 
       - name: Save news.json if it changed
@@ -47,7 +49,8 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add news.json events.json
             git commit -m "Update news and events [skip ci]"
-            git push
+            git pull --rebase origin main || git rebase --abort
+            git push || echo "Could not save the update this hour; the site is still published."
           fi
 
       - name: Collect the site files

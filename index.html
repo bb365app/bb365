@@ -19,7 +19,7 @@
 <title>BB365</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* Layout: one phone-sized app frame, centered on desktop, edge to edge on phones.
    Look: black and gold, photography first, athletic condensed display type. */
@@ -55,6 +55,7 @@ img{display:block}
 
 /* top bars + section heads */
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 0}
+@media (max-width:359px){.top{gap:8px;padding-inline:16px}.top .logo{font-size:30px}.top .row.g8{gap:6px}.top .row.g8 .ibtn{width:40px;height:40px}}
 .logo{font-family:var(--display);font-weight:800;font-style:italic;font-size:34px;line-height:1;letter-spacing:.02em;color:var(--gold)}
 .title{font-family:var(--display);font-weight:800;font-size:38px;line-height:1;text-transform:uppercase;letter-spacing:.01em}
 .ibtn{position:relative;width:44px;height:44px;border-radius:22px;background:var(--s2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text)}
@@ -496,6 +497,8 @@ const EVENTS = [
     fee: 0, spots: 0, taken: 0, img: "cv_empire", about: "Two-day professional show. Final placings are below." }
 ];
 const EV = (id) => EVENTS.find((e) => e.id === id);
+// hidden demo events open only for someone who already has an entry or ticket there (saved on this phone)
+const EVopen = (id) => { const e = EV(id); return e && (!e.hidden || S.regs.some((r) => r.event === id) || S.tickets.some((t) => t.event === id)) ? e : null; };
 /* ============ Real events (checked Nov 24, 2026; dates can change, each links its source) ============ */
 const DIV_NAMES = { open: "Men's Open", "212": "212 Bodybuilding", classic: "Classic Physique", physique: "Men's Physique", wheelchair: "Wheelchair" };
 const SCHED = "https://www.ifbbpro.com/schedule/";
@@ -534,7 +537,7 @@ const ST_RANK = { live: 0, upcoming: 1, finished: 2 };
 const evSort = (list) => list.slice().sort((a, b) => (ST_RANK[a.status] - ST_RANK[b.status]) || ((b.country === S.country) - (a.country === S.country)) || (a.status === "finished" ? (b.start || 0) - (a.start || 0) : (a.start || 0) - (b.start || 0)));
 
 const CN = { kw: { en: "Kuwait", ar: "الكويت", cur: "Kuwaiti dinar (KD)" }, sa: { en: "Saudi Arabia", ar: "السعودية", cur: "Saudi riyal (SAR)" } };
-const localFirst = (list) => list.slice().sort((a, b) => (b.country === S.country) - (a.country === S.country));
+const localFirst = (list) => list.filter((x) => x.date !== "Date not announced").sort((a, b) => ((b.country === S.country) - (a.country === S.country)) || (!!b.country - !!a.country) || ((a.start || 0) - (b.start || 0)));
 const homeEv = () => { const up = shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now()).sort((a, b) => a.start - b.start); return up.find((e) => e.country === S.country) || up[0] || EVENTS[0]; };
 const CATS = [
   { id: "open", name: "Men's Open", desc: "Open weight class, all heights" },
@@ -554,10 +557,8 @@ const DAYS = [
 const ATH = {
   ashwi: { id: "ashwi", name: "عشوي العنزي", handle: "@3shwe", ig: "https://www.instagram.com/3shwe/", real: true },
   badran: { id: "badran", name: "بدران", handle: "@vbadrann", ig: "https://www.instagram.com/vbadrann/", real: true },
-  karim: { id: "karim", name: "Karim Nasser", handle: "Sample athlete", country: "UAE", div: "Men's Open", height: "178 cm", weight: "103 kg", age: "31", photo: "ath_karim", medals: [2, 1, 1],
-    ach: [["Royal Cup Grand Prix 2026", "1st"], ["Gulf Crown Championship 2026", "1st"], ["Empire City Pro 2026", "2nd"], ["Arabian Physique Open 2026", "3rd"]] },
-  marcus: { id: "marcus", name: "Marcus Hale", handle: "Sample athlete", country: "USA", div: "Men's Open", height: "182 cm", weight: "108 kg", age: "29", photo: "ath_marcus", medals: [1, 2, 0],
-    ach: [["Empire City Pro 2026", "1st"], ["Royal Cup Grand Prix 2026", "2nd"], ["Arabian Physique Open 2026", "2nd"]] }
+  karim: { id: "karim", name: "Karim Nasser", handle: "Sample athlete", country: "UAE", div: "Men's Open", height: "178 cm", weight: "103 kg", age: "31", photo: "ath_karim" },
+  marcus: { id: "marcus", name: "Marcus Hale", handle: "Sample athlete", country: "USA", div: "Men's Open", height: "182 cm", weight: "108 kg", age: "29", photo: "ath_marcus" }
 };
 const ATH_IDS = ["ashwi", "badran", "karim", "marcus"];
 const CLUBS = [
@@ -641,13 +642,13 @@ const S = {
     return "kw"; })(),
   user: saved.user && typeof saved.user === "object" && saved.user.phone ? saved.user : null, suDone: !!saved.suDone, langSet: !!saved.langSet || (!!saved.lang && !!saved.suDone),
   su: { mode: "up", f: { name: "", phone: "", email: "", pass: "" }, err: {} },
-  regs: saved.regs || [], follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: {},
+  regs: (Array.isArray(saved.regs) ? saved.regs : []).filter((r) => r && EV(r.event)), follow: saved.follow || {}, subs: saved.subs || {}, soonN: saved.soonN && typeof saved.soonN === "object" ? saved.soonN : {}, plan: {}, remind: {},
   filter: "all", liveCat: "open", evTab: "overview", evCat: "open", shopCat: "supplements", cart: {}, sheet: null,
   alerts: { start: true, results: true }, vote: null, reg: null,
   body: Object.assign({ sex: "m", age: "", weight: "", height: "", bf: "", act: "1.55", goal: "1" }, saved.body || {}),
   wk: { prog: "coach", day: (new Date().getDay() + 6) % 7, done: saved.wkdone || {} }, fact: 0, factCat: "all", meals: 4,
-  prep: Object.assign({ date: "2027-03-04", weight: "", stage: "" }, saved.prep || {}), log: saved.log || [], org: saved.org || {}, orgF: "all",
-  tickets: saved.tickets || [], lang: saved.lang === "ar" ? "ar" : "en", coach: Object.assign({ goal: "muscle", level: "inter", days: 4, mins: 60, equip: "gym", focus: [], avoid: [] }, saved.coach || {}), coachPlan: saved.coachPlan || null, photos: Array.isArray(saved.photos) ? saved.photos : [], groups: saved.groups || null, picks: saved.picks && typeof saved.picks === "object" ? saved.picks : {}, predOut: !!saved.predOut, seen: saved.seen || {}, tk: null, tkFresh: null, rankDiv: "open",
+  prep: Object.assign({ date: "", weight: "", stage: "" }, saved.prep || {}), log: Array.isArray(saved.log) ? saved.log : [], org: saved.org || {}, orgF: "all",
+  tickets: (Array.isArray(saved.tickets) ? saved.tickets : []).filter((t) => t && EV(t.event)), lang: saved.lang === "ar" ? "ar" : "en", coach: Object.assign({ goal: "muscle", level: "inter", days: 4, mins: 60, equip: "gym", focus: [], avoid: [] }, saved.coach || {}), coachPlan: saved.coachPlan || null, photos: Array.isArray(saved.photos) ? saved.photos : [], groups: saved.groups || null, picks: saved.picks && typeof saved.picks === "object" ? saved.picks : {}, predOut: !!saved.predOut, seen: saved.seen || {}, tk: null, tkFresh: null, rankDiv: "open",
   orm: { w: "", r: "" }, fat: { neck: "", waist: "", hip: "" }, logIn: { w: "", d: new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10) }, s: { q: "" }
 };
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ langSet: S.langSet, user: S.user, suDone: S.suDone, country: S.country, countryManual: S.countryManual, soonN: S.soonN, regs: S.regs, follow: S.follow, subs: S.subs, body: S.body, wkdone: S.wk.done, prep: S.prep, log: S.log, org: S.org, tickets: S.tickets, seen: S.seen, lang: S.lang, coach: S.coach, coachPlan: S.coachPlan, photos: S.photos, groups: S.groups, picks: S.picks, predOut: S.predOut })); } catch (e) {} };
@@ -737,7 +738,7 @@ const NEWS = [
   { t: "Joseph Baena finishes top 5 in Classic Physique at his pro natural debut", date: "Nov 9, 2026", ic: "trophy", url: "https://fitnessvolt.com/joseph-baena-top-5-at-pro-natural-bodybuilding-contest/" },
   { t: "Jay Cutler on getting dry conditioning without diuretics", date: "Nov 9, 2026", ic: "flame", url: "https://fitnessvolt.com/jay-cutler-talks-getting-dry-conditioning-without-diuretics/" }
 ];
-const xl = (url, src, date) => `<a href="${url}" target="_blank" rel="noopener" class="ext">${esc(src)}${date ? " · " + esc(date) : ""} ${ic("ext", 13, 2)}</a>`;
+const xl = (url, src, date) => `<a href="${/^https:\/\//.test(url || "") ? esc(url) : "#"}" target="_blank" rel="noopener" class="ext">${esc(src)}${date ? " · " + esc(date) : ""} ${ic("ext", 13, 2)}</a>`;
 const topStory = () => `<div class="sec"><div class="story">
   <div class="row" style="justify-content:space-between;gap:10px"><span class="kicker">${esc(TOP.kicker)}</span><span class="chip ok">Final</span></div>
   <div><h3>${esc(TOP.title)}</h3><div class="muted" style="font-size:12px;margin-top:8px">${esc(TOP.sub)}</div></div>
@@ -789,7 +790,7 @@ SCREENS.events = () => `
   </div>${tabbar("events")}`;
 
 SCREENS.event = (id) => {
-  const e = EV(id); if (!e) return notFound();
+  const e = EVopen(id); if (!e) return notFound();
   const mine = S.regs.find((r) => r.event === e.id);
   const taken = spotsTaken(e);
   const tabs = [["overview", "Overview"], ["categories", "Categories"], ["results", "Results"], ["schedule", "Schedule"]];
@@ -971,12 +972,12 @@ SCREENS.profile = () => {
 
     <div class="sec"><div class="sec-h"><h2>My entries</h2></div>
       ${S.regs.length ? S.regs.map((r) => { const e = EV(r.event); return `<a href="#register-${r.event}" class="rowcard"><div class="avatar-lg" style="width:52px;height:52px;border-width:1.5px">${r.photo ? `<img src="${r.photo}" alt="">` : ic("user", 24)}</div><div style="flex:1;min-width:0"><b>${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">${esc((CATS.find((c) => c.id === r.category) || {}).name)} · ${esc(r.number)}</div></div>${stChip(stOf(r), true)}</a>`; }).join("")
-        : `<div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px"><div style="line-height:1.5">You have no entries yet. Gulf Crown Championship 2027 is open for registration.</div><a href="#register-gulfcrown" class="btn gold sm">Register now</a></div>`}
+        : `<div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px"><div style="line-height:1.5">You have no entries yet. Registration in the app opens for events BB365 partners with.</div><a href="#events" class="btn gold sm">See events</a></div>`}
     </div>
 
     <div class="sec"><div class="sec-h"><h2>My tickets</h2></div>
       ${S.tickets.length ? S.tickets.slice().reverse().map((t) => { const e = EV(t.event); const tier = TIERS.find((x) => x.id === t.tier); return `<a href="#ticket-${t.id}" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("ticket", 20)}</span><div style="flex:1;min-width:0"><b>${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">${tier.name} × ${t.qty} · ${esc(t.code)}</div></div>${ic("chev", 18)}</a>`; }).join("")
-        : `<div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px"><div style="line-height:1.5">No tickets yet. Watch Gulf Crown Championship 2027 live from the hall.</div><a href="#tickets-gulfcrown" class="btn gold sm">Get tickets</a></div>`}
+        : `<div class="card" style="padding:18px;line-height:1.5;color:#C9C9D1">No tickets yet. Tickets in the app open for events BB365 partners with.</div>`}
     </div>
 
     <div class="sec"><div class="sec-h"><h2>Following</h2></div>
@@ -1159,7 +1160,7 @@ SCREENS.prep = () => {
   return `
   <div class="scroll view-in">${toolHead("Prep planner")}
     <div class="sec" style="gap:18px"><p class="muted" style="line-height:1.5">Count down to your show and plan weight checkpoints.</p>
-      ${gin("prep", "date", "Show date", 'type="date"', "Starts as Gulf Crown Championship 2027.")}
+      ${gin("prep", "date", "Show date", 'type="date"')}
       <div class="two">${gin("prep", "weight", "Current weight (kg)", 'type="number" inputmode="decimal" placeholder="95"')}${gin("prep", "stage", "Stage weight goal (kg)", 'type="number" inputmode="decimal" placeholder="88"')}</div>
       <div id="g-out" data-o="prep" aria-live="polite" style="display:flex;flex-direction:column;gap:18px">${GOUT.prep()}</div></div>
   </div>${tabbar("tools")}`;
@@ -1268,7 +1269,7 @@ SCREENS.organizer = () => {
   const ini = (n) => n.split(/\s+/).map((x) => x[0]).slice(0, 2).join("").toUpperCase();
   return `
   <div class="scroll view-in"><div class="toolhead"><a href="#profile" class="ibtn" aria-label="Back to profile">${ic("back")}</a><h1 tabindex="-1" data-focus>Organizer view</h1><span style="width:44px"></span></div>
-    <div class="sec" style="gap:16px"><div class="card row" style="gap:12px;padding:10px"><img src="${IMG.ev1}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="min-width:0"><b style="font-size:14px">${esc(EVENTS[0].name)}</b><div class="muted" style="font-size:12px">${rows.length} entries · ${EVENTS[0].spots} spots</div></div></div>
+    <div class="sec" style="gap:16px"><div class="card row" style="gap:12px;padding:10px"><img src="${IMG.ev1}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="min-width:0"><b style="font-size:14px">Sample event</b><div class="muted" style="font-size:12px">${rows.length} entries · ${EVENTS[0].spots} spots</div></div></div>
       <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">${[["Total", rows.length], ["Pending", cnt("pending")], ["Approved", cnt("approved")], ["Rejected", cnt("rejected")]].map(([l, n]) => `<div class="fact" style="align-items:center;padding:12px 4px"><b class="disp num" style="font-size:28px;line-height:1">${n}</b><span style="font-size:11px">${l}</span></div>`).join("")}</div>
       <div class="seg" style="padding:0" role="group" aria-label="Filter entries">${[["all", "All"], ["pending", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"]].map(([k, l]) => `<button aria-pressed="${S.orgF === k}" data-act="orgF" data-v="${k}">${l}</button>`).join("")}</div>
       <div style="display:flex;flex-direction:column;gap:10px">${list.length ? list.map((r) => `<div class="card" style="padding:12px;display:flex;flex-direction:column;gap:10px"><div class="row" style="gap:12px"><div class="avatar-lg" style="width:48px;height:48px;border-width:1.5px;font-weight:700;font-size:14px">${r.photo ? `<img src="${r.photo}" alt="">` : ini(r.n)}</div><div style="flex:1;min-width:0"><b dir="auto">${esc(r.n)}${r.mine ? " (you)" : ""}</b><div class="muted" style="font-size:12px;margin-top:2px">${esc((CATS.find((c) => c.id === r.c) || {}).name)} · ${esc(r.nat)} · ${esc(r.club)}</div></div>${stChip(r.st, true)}</div>
@@ -1280,7 +1281,7 @@ SCREENS.organizer = () => {
 /* ---- Search ---- */
 GOUT.search = () => {
   const q = S.s.q.trim().toLowerCase();
-  if (!q) return `<div class="muted" style="margin-bottom:10px">Try one of these:</div><div class="seg" style="padding:0;flex-wrap:wrap;overflow:visible">${["Gulf Crown", "Protein", "SHPOOOV", "Calories", "Dubai"].map((s) => `<button data-act="searchSet" data-v="${s}" aria-pressed="false">${s}</button>`).join("")}</div>`;
+  if (!q) return `<div class="muted" style="margin-bottom:10px">Try one of these:</div><div class="seg" style="padding:0;flex-wrap:wrap;overflow:visible">${["Kuwait", "Olympia", "Riyadh", "Protein", "Calories"].map((s) => `<button data-act="searchSet" data-v="${s}" aria-pressed="false">${s}</button>`).join("")}</div>`;
   const has = (...t) => t.join(" ").toLowerCase().includes(q);
   const groups = [
     ["Events", shownEvents().filter((e) => has(e.name, e.place)).map((e) => ["#event-" + e.id, e.name, e.place + " · " + e.date, e.img])],
@@ -1292,7 +1293,7 @@ GOUT.search = () => {
 };
 SCREENS.search = () => `
   <div class="scroll view-in"><div class="toolhead"><a href="#home" class="ibtn" aria-label="Back to home">${ic("back")}</a><h1 tabindex="-1" data-focus>Search</h1><span style="width:44px"></span></div>
-    <div class="sec" style="gap:16px"><div class="field"><label for="g-s-q" class="vh">Search BB365</label><input class="input" id="g-s-q" data-g="s.q" type="search" placeholder="Events, athletes, clubs, products, tools" autocomplete="off" enterkeyhint="search" value="${esc(S.s.q)}"></div>
+    <div class="sec" style="gap:16px"><div class="field"><label for="g-s-q" class="vh">Search BB365</label><input class="input" id="g-s-q" data-g="s.q" type="search" placeholder="Events, athletes, tools" autocomplete="off" enterkeyhint="search" value="${esc(S.s.q)}"></div>
       <div id="g-out" data-o="search" aria-live="polite" style="display:flex;flex-direction:column;gap:18px">${GOUT.search()}</div></div>
   </div>${tabbar("home")}`;
 
@@ -1377,7 +1378,7 @@ SCREENS.alerts = () => {
 
 /* ---- tickets ---- */
 SCREENS.tickets = (id) => {
-  const e = EV(id); if (!e || !e.tickets) return notFound();
+  const e = EVopen(id); if (!e || !e.tickets) return notFound();
   if (!S.tk || S.tk.event !== id) S.tk = newTk(id);
   const T = S.tk; const tier = TIERS.find((x) => x.id === T.tier); const total = tier.price * T.qty;
   const err = (f) => T.errors[f] ? `<div class="err" id="e-tk-${f}" role="alert">${esc(T.errors[f])}</div>` : "";
@@ -1419,7 +1420,7 @@ SCREENS.ticket = (id) => {
 
 /* ---- registration ---- */
 SCREENS.register = (id) => {
-  const e = EV(id);
+  const e = EVopen(id);
   if (!e || !e.reg) return notFound();
   if (!S.reg || S.reg.event !== id) S.reg = newReg(id);
   const R = S.reg; const d = R.data;
@@ -1632,7 +1633,8 @@ document.addEventListener("change", async (ev) => {
 /* ============ render + routing (plain #name hashes) ============ */
 const view = document.getElementById("view");
 function route() {
-  const m = decodeURIComponent(location.hash.replace(/^#\/?/, "")).match(/^([a-z]+)(?:-([a-z0-9-]+))?$/);
+  let h = location.hash.replace(/^#\/?/, ""); try { h = decodeURIComponent(h); } catch (e) {}
+  const m = h.match(/^([a-z]+)(?:-([a-z0-9-]+))?$/);
   if (!m) return ["splash"];
   const [, n, a] = m;
   if (n === "register" || n === "event" || n === "athlete" || n === "tickets" || n === "ticket" || n === "group") return [n, a];
@@ -1646,7 +1648,7 @@ function render(keepScroll) {
   const changed = key !== lastRoute;
   if (changed && lastRoute === "alerts-") markSeen();
   if (changed) { S.sheet = null; if (name === "event") { const ev = EV(arg); S.evTab = ev && ev.status === "finished" ? "results" : "overview"; if (ev && ev.res && !ev.res[S.evCat]) S.evCat = (ev.divs || Object.keys(ev.res)).find((d) => ev.res[d]); } if (name === "register" && S.reg && S.reg.justDone) S.reg.justDone = false; }
-  view.innerHTML = SCREENS[name](arg);
+  try { view.innerHTML = SCREENS[name](arg); } catch (err) { console.error(err); view.innerHTML = notFound(); }
   const ns = view.querySelector(".scroll"); if (ns) ns.scrollTop = top;
   if (!changed) view.querySelectorAll(".view-in").forEach((x) => x.classList.remove("view-in"));
   if (changed) { const f = view.querySelector("[data-focus]"); if (f) f.focus({ preventScroll: true }); lastRoute = key; }
@@ -1923,7 +1925,7 @@ SCREENS.predict = () => {
     body = `<h3 class="pd-h">Result</h3>${top3(P.result.map((n) => P.list.find((x) => x[0] === n)))}
       <h3 class="pd-h">Your picks</h3>${pick.length ? pick.map((n, i) => { const pts = pdPts(c, i), at = P.result.indexOf(n); return `<div class="pd-out${at === i ? " hit" : ""}"><b class="pd-o">${ORD[i]}</b><div style="flex:1;min-width:0"><b style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">${at === i ? "Correct" : at >= 0 ? "Finished " + ORD[at] : "Outside the top 3"}</span></div><span class="pts num">+${pts} pts</span></div>`; }).join("") + `<div class="sum" style="padding:6px 2px 0;border:0"><span>This division</span><b class="num">+${pdDiv(c)} pts</b></div>` : fEmpty("You did not pick this division.")}`;
   } else if (st === "locked") {
-    body = `${fEmpty("On stage now. Picks are locked.")}<a href="#event-gulfpro" class="btn line block">See live results</a>`;
+    body = fEmpty("On stage now. Picks are locked.");
   } else {
     body = `<p class="pd-hint">This division is final. Picks are closed.</p>${top3(LIVE[c].rows)}`;
   }
@@ -1972,16 +1974,16 @@ const AR = {
   "All": "الكل", "Results": "النتائج", "Drama": "المناوشات", "News": "الأخبار", "Filter the feed": "فلترة الأخبار",
   "Top story": "الخبر الرئيسي", "Olympia 2026": "أولمبيا 2026", "Final": "نهائي",
   "Nick Walker wins the 2026 Mr. Olympia": "نيك ووكر يفوز بلقب مستر أولمبيا 2026",
-  "Dauda won Saturday's finals, but Walker's lead from prejudging decided the title. Lower score wins.": "Dauda فاز بنهائي السبت، لكن تقدّم Walker في التحكيم الأولي حسم اللقب. الأقل نقاطًا يفوز.",
+  "Dauda won Saturday's finals, but Walker's lead from prejudging decided the title. Lower score wins.": "داودا فاز بنهائي السبت، لكن تقدّم ووكر في التحكيم الأولي حسم اللقب. الأقل نقاطًا يفوز.",
   "Live now": "مباشر الآن", "Full results": "كل النتائج", "Live": "مباشر", "Provisional order after prejudging": "ترتيب مبدئي بعد التحكيم الأولي",
   "Sample live results for the demo.": "نتائج مباشرة تجريبية للعرض.", "Latest results": "آخر النتائج",
   "2026 Olympia champions": "أبطال أولمبيا 2026", "Mr. Olympia": "مستر أولمبيا", "Ms. Olympia": "مس أولمبيا",
   "Scorecards": "بطاقات التحكيم", "Won the finals, lost the Olympia": "فاز بالنهائي وخسر الأولمبيا",
-  "Dauda scored 5 in the finals, the best round of the night. Walker's prejudging lead still gave him the title, 18 points to 20.": "Dauda حصل على 5 نقاط في النهائي، أفضل جولة في الليلة. لكن تقدّم Walker في التحكيم الأولي منحه اللقب بـ 18 نقطة مقابل 20.",
-  "Callout": "رد", "Fake quote": "تصريح مزيّف", "Yates hits back at a viral quote": "Yates يرد على تصريح منتشر",
-  "The six-time Mr. Olympia says a quote shared online was the opposite of his view. Walker got his vote for his conditioning.": "بطل مستر أولمبيا ست مرات يقول إن تصريحًا انتشر على الإنترنت عكس رأيه تمامًا، وإن Walker حصل على صوته بسبب تنشيفه.",
-  "Judging": "التحكيم", "China Pro judges": "حكام China Pro", "“Daylight robbery”": "«سرقة في وضح النهار»",
-  "Priest says James Hollingshead was robbed at the 2026 China Pro, where Behrooz Tabani won by six points.": "Priest يقول إن James Hollingshead تعرّض للظلم في China Pro 2026، التي فاز بها Behrooz Tabani بفارق ست نقاط.",
+  "Dauda scored 5 in the finals, the best round of the night. Walker's prejudging lead still gave him the title, 18 points to 20.": "داودا حصل على 5 نقاط في النهائي، أفضل جولة في الليلة. لكن تقدّم ووكر في التحكيم الأولي منحه اللقب بـ 18 نقطة مقابل 20.",
+  "Callout": "رد", "Fake quote": "تصريح مزيّف", "Yates hits back at a viral quote": "ييتس يرد على تصريح منتشر",
+  "The six-time Mr. Olympia says a quote shared online was the opposite of his view. Walker got his vote for his conditioning.": "بطل مستر أولمبيا ست مرات يقول إن تصريحًا انتشر على الإنترنت عكس رأيه تمامًا، وإن ووكر حصل على صوته بسبب تنشيفه.",
+  "Judging": "التحكيم", "China Pro judges": "حكام تشاينا برو", "“Daylight robbery”": "«سرقة في وضح النهار»",
+  "Priest says James Hollingshead was robbed at the 2026 China Pro, where Behrooz Tabani won by six points.": "بريست يقول إن جيمس هولينغزهيد تعرّض للظلم في تشاينا برو 2026، التي فاز بها بهروز تباني بفارق ست نقاط.",
   "Latest news": "آخر الأخبار",
   "Arnold Schwarzenegger on why you need both light and heavy weights": "Arnold Schwarzenegger: لماذا تحتاج الأوزان الخفيفة والثقيلة معًا",
   "Wesley Vissers shares his 5 go-to triceps exercises ahead of the 2027 Arnold Classic": "Wesley Vissers يشارك أفضل 5 تمارين ترايسبس عنده قبل Arnold Classic 2027",
@@ -2082,10 +2084,10 @@ const AR = {
   "Summaries are simplified. Read the original paper before changing your training or supplements.": "الملخصات مبسّطة. اقرأ البحث الأصلي قبل تغيير تمرينك أو مكملاتك.",
   // facts
   "History": "تاريخ", "Science": "علوم", "Nutrition": "تغذية", "Training": "تمرين", "Topic": "الموضوع", "Next fact": "الحقيقة التالية",
-  "The first Mr. Olympia was held in 1965 in New York and won by Larry Scott.": "أُقيمت أول بطولة مستر أولمبيا عام 1965 في نيويورك وفاز بها Larry Scott.",
-  "Arnold Schwarzenegger won Mr. Olympia seven times. Lee Haney and Ronnie Coleman each won it eight times.": "فاز Arnold Schwarzenegger بلقب مستر أولمبيا سبع مرات، بينما فاز به كل من Lee Haney وRonnie Coleman ثماني مرات.",
-  "Eugen Sandow staged the Great Competition at the Royal Albert Hall in 1901. The Mr. Olympia trophy is named after him.": "نظّم Eugen Sandow «المسابقة الكبرى» في قاعة رويال ألبرت عام 1901، وكأس مستر أولمبيا يحمل اسمه.",
-  "The IFBB was founded in 1946 by the brothers Joe and Ben Weider.": "تأسس الاتحاد الدولي لكمال الأجسام (IFBB) عام 1946 على يد الأخوين Joe وBen Weider.",
+  "The first Mr. Olympia was held in 1965 in New York and won by Larry Scott.": "أُقيمت أول بطولة مستر أولمبيا عام 1965 في نيويورك وفاز بها لاري سكوت.",
+  "Arnold Schwarzenegger won Mr. Olympia seven times. Lee Haney and Ronnie Coleman each won it eight times.": "فاز أرنولد شوارزنيجر بلقب مستر أولمبيا سبع مرات، بينما فاز به كل من لي هايني وروني كولمان ثماني مرات.",
+  "Eugen Sandow staged the Great Competition at the Royal Albert Hall in 1901. The Mr. Olympia trophy is named after him.": "نظّم يوجين ساندو «المسابقة الكبرى» في قاعة رويال ألبرت عام 1901، وكأس مستر أولمبيا يحمل اسمه.",
+  "The IFBB was founded in 1946 by the brothers Joe and Ben Weider.": "تأسس الاتحاد الدولي لكمال الأجسام (IFBB) عام 1946 على يد الأخوين جو وبن وايدر.",
   "Classic Physique joined Mr. Olympia weekend in 2016.": "انضمت فئة الكلاسيك فيزيك لأسبوع مستر أولمبيا عام 2016.",
   "Mechanical tension, the load a muscle works against, is considered the main driver of muscle growth.": "الشد الميكانيكي، أي الحمل الذي تعمل العضلة ضده، يُعتبر المحرك الأساسي لنمو العضلات.",
   "When sets are taken close to failure, rep ranges from about 5 to 30 can build similar amounts of muscle.": "عندما تقترب الجولات من الفشل، فإن التكرارات من حوالي 5 إلى 30 تبني كمية متقاربة من العضلات.",
@@ -2191,6 +2193,18 @@ const AR_WD = { Mon: "الاثنين", Tue: "الثلاثاء", Wed: "الأرب
 const AR_ORD = { 1: "الأول", 2: "الثاني", 3: "الثالث", 4: "الرابع", 5: "الخامس", 6: "السادس", 7: "السابع", 8: "الثامن", 9: "التاسع" };
 const arPeople = (n) => (n === 1 ? "شخص واحد" : n === 2 ? "شخصان" : n <= 10 ? n + " أشخاص" : n + " شخصًا");
 const MRX = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec)";
+/* Arabic for fixes (Nov 25, 2026): empty states, search, sample names and country codes */
+Object.assign(AR, {
+  "You have no entries yet. Registration in the app opens for events BB365 partners with.": "ما عندك مشاركات للحين. التسجيل من التطبيق يفتح للبطولات اللي يتشارك معها BB365.",
+  "No tickets yet. Tickets in the app open for events BB365 partners with.": "ما عندك تذاكر للحين. التذاكر من التطبيق تفتح للبطولات اللي يتشارك معها BB365.",
+  "See events": "شوف البطولات", "Sample event": "بطولة تجريبية", "Events, athletes, tools": "بطولات، لاعبين، أدوات",
+  "Olympia": "أولمبيا", "Riyadh": "الرياض", "Kuwait": "الكويت",
+  "Gym Boys": "شباب الجيم", "OXYGEN Squad": "فريق أوكسجين",
+  "Pavel Horak": "بافل هوراك", "Jan Kowalski": "يان كوفالسكي", "Mateo Silva": "ماتيو سيلفا", "Yusuf Demir": "يوسف دمير", "Adam Novak": "آدم نوفاك",
+  "Omar Haddad": "عمر حداد", "Khaled Mansour": "خالد منصور", "Tariq Farouk": "طارق فاروق",
+  "USA": "أمريكا", "GER": "ألمانيا", "ESP": "إسبانيا", "ITA": "إيطاليا", "CZE": "التشيك", "POL": "بولندا", "GBR": "بريطانيا", "BRA": "البرازيل",
+  "CAN": "كندا", "SWE": "السويد", "DEN": "الدنمارك", "BUL": "بلغاريا", "TUR": "تركيا", "IRN": "إيران"
+});
 const AR_RX = [
   [new RegExp("^" + MRX + " (\\d{1,2}(?:–\\d{1,2})?), (\\d{4})$"), (m, mo, d, y) => `${d} ${AR_MON[mo]} ${y}`],
   [new RegExp("^(\\d{1,2}) " + MRX + " (\\d{4})$"), (m, d, mo, y) => `${d} ${AR_MON[mo]} ${y}`],
@@ -2618,14 +2632,14 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
   try {
     const r = await fetch("events.json", { cache: "no-cache" }); if (!r.ok) return;
     const j = await r.json(); const list = Array.isArray(j.events) ? j.events : [];
-    const ok = list.filter((x) => x && typeof x.name === "string" && /^\d{4}-\d\d-\d\d$/.test(x.start || "") && Array.isArray(x.divs));
+    const ok = list.filter((x) => x && typeof x.name === "string" && /^[a-z0-9-]+$/.test(String(x.id)) && !isNaN(new Date(x.start + "T12:00:00")) && /^\d{4}-\d\d-\d\d$/.test(x.start || "") && Array.isArray(x.divs));
     if (!ok.length) return;
     const old = EVENTS.filter((e) => e.auto);
     for (let i = EVENTS.length - 1; i >= 0; i--) if (EVENTS[i].auto) EVENTS.splice(i, 1);
     ok.forEach((x) => {
-      const start = new Date(x.start + "T12:00:00");
+      const start = new Date(x.start + "T12:00:00"); const endD = new Date((/^\d{4}-\d\d-\d\d$/.test(x.end || "") ? x.end : x.start) + "T23:59:59");
       const same = old.find((e) => e.start && e.start.toDateString() === start.toDateString() && e.place.split(",")[0].toLowerCase() === String(x.place).split(",")[0].toLowerCase());
-      EVENTS.push({ auto: true, real: true, reg: false, fee: 0, spots: 0, taken: 0, status: "upcoming", fed: "IFBB Pro League", url: j.source || "https://www.ifbbpro.com/schedule/", src: "IFBB Pro League schedule",
+      EVENTS.push({ auto: true, real: true, reg: false, fee: 0, spots: 0, taken: 0, status: endD < new Date() ? "finished" : start <= new Date() ? "live" : "upcoming", fed: "IFBB Pro League", url: /^https:\/\//.test(j.source || "") ? j.source : "https://www.ifbbpro.com/schedule/", src: "IFBB Pro League schedule",
         id: same ? same.id : String(x.id), name: x.name, date: String(x.date), place: String(x.place), start, divs: x.divs.filter((d) => DIV_NAMES[d]),
         img: same ? same.img : coverFor(x.place), country: /saudi/i.test(x.place) ? "sa" : /kuwait/i.test(x.place) ? "kw" : "", about: String(x.about || "") });
     });
@@ -2641,7 +2655,7 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
     (Array.isArray(j.events) ? j.events : []).forEach((x) => {
       if (!x || typeof x.id !== "string" || !/^[a-z0-9-]+$/.test(x.id) || typeof x.name !== "string") return;
       const o = { name: x.name, date: String(x.date || ""), place: String(x.place || ""), about: String(x.about || ""), status: ["upcoming", "live", "finished"].includes(x.status) ? x.status : "upcoming" };
-      if (/^\d{4}-\d\d-\d\d$/.test(x.start || "")) o.start = new Date(x.start + "T12:00:00");
+      if (/^\d{4}-\d\d-\d\d$/.test(x.start || "") && !isNaN(new Date(x.start + "T12:00:00"))) { o.start = new Date(x.start + "T12:00:00"); const en = new Date(((/^\d{4}-\d\d-\d\d$/.test(x.end || "") ? x.end : x.start)) + "T23:59:59"); if (en < new Date() && o.status === "upcoming") o.status = "finished"; }
       if (Array.isArray(x.divs)) o.divs = x.divs.filter((d) => DIV_NAMES[d]);
       if (/^https:\/\//.test(x.url || "")) { o.url = x.url; o.src = String(x.src || "Official page"); }
       const e = EV(x.id);

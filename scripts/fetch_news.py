@@ -1,7 +1,7 @@
 """BB365 news robot.
 
 Reads bodybuilding news feeds and writes news.json, which the app shows on its home page.
-GitHub runs this every 3 hours (see .github/workflows/news.yml). Uses only the Python standard library.
+GitHub runs this every hour (see .github/workflows/publish.yml). Uses only the Python standard library.
 
 Items written by hand or by the daily editor (they have "keep": true) stay at the top for 14 days.
 If every feed fails, news.json is left as it is.
@@ -114,6 +114,8 @@ def main():
             old = json.loads(OUT.read_text(encoding="utf-8"))
         except ValueError:
             old = {}
+    if not isinstance(old, dict):
+        old = {}
     now = datetime.now(timezone.utc)
     cutoff = int((now - timedelta(days=KEEP_DAYS)).timestamp())
     kept = [x for x in old.get("items", []) if x.get("keep") and x.get("ts", 0) >= cutoff]
@@ -129,6 +131,9 @@ def main():
             print(f"{name}: skipped ({err.__class__.__name__}: {err})", file=sys.stderr)
     if ok == 0:
         print("No feed could be read. news.json left unchanged.")
+        return
+    if not found:
+        print("The feeds had no bodybuilding stories. news.json left unchanged.")
         return
 
     found.sort(key=lambda x: x["ts"], reverse=True)
