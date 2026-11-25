@@ -547,8 +547,8 @@ const ST_RANK = { live: 0, upcoming: 1, finished: 2 };
 const evSort = (list) => list.slice().sort((a, b) => (ST_RANK[a.status] - ST_RANK[b.status]) || ((b.country === S.country) - (a.country === S.country)) || (a.status === "finished" ? (b.start || 0) - (a.start || 0) : (a.start || 0) - (b.start || 0)));
 
 const CN = { kw: { en: "Kuwait", ar: "الكويت", cur: "Kuwaiti dinar (KD)" }, sa: { en: "Saudi Arabia", ar: "السعودية", cur: "Saudi riyal (SAR)" } };
-const localFirst = (list) => list.filter((x) => x.date !== "Date not announced").sort((a, b) => ((b.country === S.country) - (a.country === S.country)) || (!!b.country - !!a.country) || ((a.start || 0) - (b.start || 0)));
-const homeEv = () => { const up = shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now() && e.date !== "Date not announced").sort((a, b) => a.start - b.start); return up.find((e) => e.country === S.country) || up.find((e) => e.country) || up[0] || null; };
+const localFirst = (list) => list.filter((x) => x.date !== "Date not announced").sort((a, b) => (a.start || 0) - (b.start || 0));
+const homeEv = () => { const up = shownEvents().filter((e) => e.status === "upcoming" && e.start > Date.now() && e.date !== "Date not announced").sort((a, b) => a.start - b.start); return up[0] || null; }; // the nearest upcoming event, wherever it is
 const CATS = [
   { id: "open", name: "Men's Open", desc: "Open weight class, all heights" },
   { id: "classic", name: "Classic Physique", desc: "Height-to-weight limits apply" },
