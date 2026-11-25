@@ -542,7 +542,7 @@ const ATH = {
   karim: { id: "karim", name: "Karim Nasser", handle: "Sample athlete", country: "UAE", div: "Men's Open", height: "178 cm", weight: "103 kg", age: "31", photo: "ath_karim" },
   marcus: { id: "marcus", name: "Marcus Hale", handle: "Sample athlete", country: "USA", div: "Men's Open", height: "182 cm", weight: "108 kg", age: "29", photo: "ath_marcus" }
 };
-const ATH_IDS = ["ashwi", "badran", "karim", "marcus"];
+const ATH_IDS = ["ashwi", "badran"];
 const CLUBS = [
   { country: "kw", id: "shpooov", name: "SHPOOOV", img: "club_shpooov", area: "Kuwait", perks: ["Free weights and benches", "Open training floor"], price: 25 },
   { country: "kw", id: "oxygen", name: "OXYGEN", ar: "أوكسجين", img: "club_oxygen", area: "Kuwait", perks: ["Multi-floor club building", "Glass-front training halls"], price: 30 }
@@ -825,7 +825,7 @@ SCREENS.athletes = () => `
   <div class="scroll view-in">
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Athletes</h1><a href="#home" class="ibtn" aria-label="Back to home">${ic("close")}</a></div>
     <div class="sec"><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 240)).join("")}</div>
-    <p class="note">Karim Nasser and Marcus Hale are sample profiles. Photos and details for real athletes are added with their permission.</p></div>
+    <p class="note">Photos and details are added with each athlete’s permission.</p></div>
   </div>${tabbar("home")}`;
 
 SCREENS.athlete = (id) => {
@@ -948,7 +948,7 @@ SCREENS.profile = () => {
 
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>Country</h2></div><div class="seg" style="padding:0" role="radiogroup" aria-label="Country">${["kw", "sa"].map((k) => `<button role="radio" aria-checked="${S.country === k}" aria-pressed="${S.country === k}" data-act="country" data-v="${k}">${tx(CN[k].en, CN[k].ar)}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">Set automatically from your location. Prices, events and clubs follow it.</p></div>
 
-    <div class="sec" style="gap:10px"><div class="sec-h"><h2>My predictions</h2></div><a href="#predict" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("trophy", 20)}</span><div style="flex:1;min-width:0"><b>Practice round</b><div class="muted" style="font-size:12px;margin-top:2px">${pdMine()} pts · You are ${ordEn(pdRank()[0])} of ${pdRank()[1]}</div></div>${ic("chev", 18)}</a></div>
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>My predictions</h2></div><a href="#predict" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("trophy", 20)}</span><div style="flex:1;min-width:0"><b>Practice round</b><div class="muted" style="font-size:12px;margin-top:2px">${pdMine()} pts · Olympia 2026</div></div>${ic("chev", 18)}</a></div>
 
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>My groups</h2><a href="#groups" class="link">Create or join</a></div>${S.groups.length ? S.groups.map(groupRow).join("") : `<div class="card" style="padding:16px;color:#D8D8DE">No groups yet.</div>`}</div>
 
@@ -1321,7 +1321,8 @@ const rankRow = ([n, c, pts, d], i) => {
   return a ? `<a href="#athlete-${a.id}" class="rowcard">${inner}</a>` : `<div class="rowcard">${inner}</div>`;
 };
 
-SCREENS.rankings = () => {
+SCREENS.rankings = () => notFound(); // hidden until real ranking points exist
+const rankingsSample = () => {
   const dv = RANKS[S.rankDiv] ? S.rankDiv : "open"; const rows = RANKS[dv]; const lead = rows[0];
   const la = Object.values(ATH).find((x) => x.name === lead[0]); const dn = (CATS.find((c) => c.id === dv) || {}).name;
   return `
@@ -1875,13 +1876,15 @@ document.addEventListener("input", (ev) => {
 });
 
 /* ============ Predictions: pick the top 3 in each division, earn points, compete with friends (sample data) ============ */
-const PRED = {
-  classic: { list: [["Oliver Grant", "GBR"], ["Rafael Costa", "BRA"], ["Ethan Cole", "CAN"], ["Mats Eriksson", "SWE"], ["Mikael Dahl", "DEN"], ["Ivan Petrov", "BUL"]], result: ["Rafael Costa", "Oliver Grant", "Mats Eriksson"] },
-  physique: { list: [["Jonas Weber", "GER"], ["Tyler Brooks", "USA"], ["Hamad Al-Zaabi", "UAE"], ["Luca Ferri", "ITA"], ["Noah Bell", "GBR"], ["Ali Rahimi", "IRN"]], result: ["Tyler Brooks", "Jonas Weber", "Hamad Al-Zaabi"] }
+const PRED = { // practice round: the real Mr. Olympia 2026 line-up (top 5, A to Z) and the real top 3 (Fitness Volt)
+  classic: { list: [["Mike Sommerfeld", ""], ["Niall Darwen", ""], ["Ramon Dino", ""], ["Terrence Ruffin", ""], ["Wesley Vissers", ""]], result: ["Niall Darwen", "Mike Sommerfeld", "Ramon Dino"] },
+  physique: { list: [["Ali Bilal", ""], ["Brandon Hendrickson", ""], ["Erin Banks", ""], ["Kyron Holden", ""], ["Ryan Terry", ""]], result: ["Ryan Terry", "Ali Bilal", "Kyron Holden"] },
+  open: { list: [["Andrew Jacked", ""], ["Derek Lunsford", ""], ["Nick Walker", ""], ["Samson Dauda", ""], ["Tonio Burton", ""]], result: ["Nick Walker", "Samson Dauda", "Derek Lunsford"] }
 };
+const PRED_SRC = "https://fitnessvolt.com/2026-mr-olympia-results/";
 const PD_ORDER = ["classic", "physique", "open"];
 const PD_PTS = [5, 3, 2];
-const PD_FR = [["Salem", 8, 7], ["Fahad", 6, 10], ["Yousef", 5, 4], ["Abdullah", 3, 8]]; // name, points so far, points gained when the sample results come in
+const PD_FR = []; // friends come from Challenges groups once real accounts exist
 const pdLock = (c) => ((LIVE[c].when || "").match(/\d\d:\d\d/) || [""])[0];
 const pdState = (c) => (PRED[c] ? (S.predOut ? "scored" : "open") : LIVE[c].st === "live" ? "locked" : "final");
 const pdPick = (c) => (PRED[c] && Array.isArray(S.picks[c]) ? S.picks[c].filter((n) => PRED[c].list.some((x) => x[0] === n)).slice(0, 3) : []);
@@ -1901,7 +1904,7 @@ SCREENS.predict = () => {
     const left = 3 - pick.length;
     body = `<p class="pd-hint">${left === 3 ? "Tap 3 athletes in the order you think they will finish." : left ? left + " more to pick." : (pdLock(c) ? "Your picks are saved. You can change them until " + pdLock(c) + "." : "Your picks are saved.")}</p>
       <div class="pd-slots" role="group" aria-label="Your top 3">${[0, 1, 2].map((i) => `<div class="pd-slot${pick[i] ? " f" : ""}"><span>${ORD[i]}</span><b>${pick[i] ? esc(pick[i]) : "–"}</b></div>`).join("")}</div>
-      <div class="pd-list">${P.list.map(([n, cc]) => { const i = pick.indexOf(n); const rank = RANKS[c].findIndex((r) => r[0] === n) + 1; return `<button class="pd-row" aria-pressed="${i >= 0}" data-act="pick" data-v="${c}|${esc(n)}"><span class="pd-n">${i >= 0 ? i + 1 : ""}</span><span style="flex:1;min-width:0"><b style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">${cc}${rank ? " · No. " + rank : ""}</span></span></button>`; }).join("")}</div>
+      <div class="pd-list">${P.list.map(([n, cc]) => { const i = pick.indexOf(n); return `<button class="pd-row" aria-pressed="${i >= 0}" data-act="pick" data-v="${c}|${esc(n)}"><span class="pd-n">${i >= 0 ? i + 1 : ""}</span><span style="flex:1;min-width:0"><b style="display:block;font-size:14px">${esc(n)}</b><span class="muted" style="font-size:12px">Olympia 2026 top 5</span></span></button>`; }).join("")}</div>
       ${pick.length ? `<button class="btn line sm" style="align-self:flex-start" data-act="predClear" data-v="${c}">${ic("refresh", 16)} Clear picks</button>` : ""}`;
   } else if (st === "scored") {
     body = `<h3 class="pd-h">Result</h3>${top3(P.result.map((n) => P.list.find((x) => x[0] === n)))}
@@ -1916,19 +1919,17 @@ SCREENS.predict = () => {
     <p class="lead">Pick the top 3 in each division. You earn points when the results come in.</p>
     <div class="sec"><div class="card pd-ev">
       <a href="#event-${e.id}" class="row" style="gap:12px"><img src="${IMG[e.img]}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(e.date)}</span> · <span>${esc(e.place)}</span></div></div><span class="chip gold">Upcoming</span></a>
-      <p class="pd-hint" style="font-size:13px">Real picks open when the start list is published. Until then, play the practice round below with sample athletes.</p>
-      <div class="pd-stat"><div><span>Your points</span><b class="num">${pdMine()}</b></div><div><span>Your rank</span><b class="num">${rk} / ${of}</b></div><div><span>Divisions picked</span><b class="num">${pdDone()} / ${Object.keys(PRED).length}</b></div></div>
+      <p class="pd-hint" style="font-size:13px">Real picks open when the start list is published. Until then, practise on Mr. Olympia 2026: pick the top 3, then see the real results.</p>
+      <div class="pd-stat"><div><span>Your points</span><b class="num">${pdMine()}</b></div><div><span>Most possible</span><b class="num">${Object.keys(PRED).length * 10}</b></div><div><span>Divisions picked</span><b class="num">${pdDone()} / ${Object.keys(PRED).length}</b></div></div>
     </div></div>
-    <div class="sec"><div class="sec-h"><h2>Practice round</h2><span class="chip">Sample athletes</span></div></div>
+    <div class="sec"><div class="sec-h"><h2>Practice round</h2><span class="chip">Olympia 2026</span></div></div>
     <div class="seg" role="group" aria-label="Division">${PD_ORDER.map((k) => `<button aria-pressed="${c === k}" data-act="predCat" data-v="${k}">${CATS.find((x) => x.id === k).name}</button>`).join("")}</div>
     <div class="sec" style="gap:12px"><div class="row g8" style="flex-wrap:wrap"><b class="disp" style="font-size:22px;text-transform:uppercase;letter-spacing:.03em">${cn}</b>${chip}${st === "open" && pdLock(c) ? `<span class="muted" style="font-size:12px">Picks lock at ${pdLock(c)}</span>` : ""}</div>${body}</div>
-    <div class="sec"><div class="card form" style="gap:12px"><b style="font-size:16px">Try the demo</b><p style="margin:0;font-size:14px;line-height:1.5;color:#D8D8DE">${S.predOut ? "Sample results are in. Open each division to see your points." : "Bring in sample results to see how points and ranking work."}</p>
-      ${S.predOut ? `<button class="btn line block" data-act="predReset">${ic("refresh", 18)} Start over</button>` : `<button class="btn gold block" data-act="predReveal">${ic("flame", 18)} Show sample results</button>`}</div></div>
-    <div class="sec" style="gap:10px"><div class="sec-h"><h2>Leaderboard</h2><span class="muted" style="font-size:12px">You are ${ordEn(rk)} of ${of}</span></div>
-      <div class="lb">${pdRows().map(([n, p, me], i) => `<div class="lb-row${me ? " me" : ""}"><span class="lb-n">${i === 0 ? ic("trophy", 18) : i + 1}</span><span class="av" data-keep>${nm(n).slice(0, 1)}</span><div style="min-width:0"><b>${n}</b></div><div class="sc"><b class="num">${p} pts</b></div></div>`).join("")}</div></div>
+    <div class="sec"><div class="card form" style="gap:12px"><b style="font-size:16px">Real results</b><p style="margin:0;font-size:14px;line-height:1.5;color:#D8D8DE">${S.predOut ? "The real Olympia 2026 results are in. Open each division to see your points." : "When you have made your picks, bring in the real Olympia 2026 results to see your points."}</p>
+      ${S.predOut ? `<button class="btn line block" data-act="predReset">${ic("refresh", 18)} Start over</button>` : `<button class="btn gold block" data-act="predReveal">${ic("flame", 18)} Show the real results</button>`}${xl(PRED_SRC, "Fitness Volt")}</div></div>
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>How points work</h2></div><div class="card" style="padding:6px 16px">${[["Correct winner", 5], ["Correct 2nd place", 3], ["Correct 3rd place", 2], ["In the top 3, wrong place", 1]].map(([l, p]) => `<div class="sum"><span>${l}</span><b class="num">+${p}</b></div>`).join("")}</div></div>
-    <div class="sec" style="gap:10px"><div class="sec-h"><h2>Coming up</h2></div><a href="#event-arnolduk27" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("calendar", 20)}</span><div style="flex:1;min-width:0"><b>${esc(EV("arnolduk27").name)}</b><div class="muted" style="font-size:12px;margin-top:2px">Predictions open when the start list is published.</div></div>${ic("chev", 18)}</a></div>
-    <p class="note" style="padding:0 20px">Demo: athletes, results and friends are sample data. Real predictions need accounts and a server.</p>
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>Coming up</h2></div><a href="#event-${e.id}" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("calendar", 20)}</span><div style="flex:1;min-width:0"><b>${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">Predictions open when the start list is published.</div></div>${ic("chev", 18)}</a></div>
+    <p class="note" style="padding:0 20px">The practice round uses the real Mr. Olympia 2026 top 5 and results. Points with friends start when real accounts are ready.</p>
   </div>${tabbar("home")}`;
 };
 Object.assign(ACT, {
@@ -1940,7 +1941,7 @@ Object.assign(ACT, {
     S.picks[c] = p; persist();
   },
   predClear: (c) => { delete S.picks[c]; persist(); },
-  predReveal: () => { if (!Object.keys(PRED).some((c) => pdPick(c).length)) { toast("Make your picks first."); return; } S.predOut = true; persist(); toast("Sample results are in"); },
+  predReveal: () => { if (!Object.keys(PRED).some((c) => pdPick(c).length)) { toast("Make your picks first."); return; } S.predOut = true; persist(); toast("Real results are in"); },
   predReset: () => { S.predOut = false; S.picks = {}; persist(); }
 });
 
@@ -2647,6 +2648,18 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
     if (n && ["events", "home", "event", "search"].includes(route()[0])) render(true);
   } catch (e) {}
 })();
+Object.assign(AR, {
+  "Real picks open when the start list is published. Until then, practise on Mr. Olympia 2026: pick the top 3, then see the real results.": "التوقعات الحقيقية تفتح أول ما تنتشر قائمة المشاركين. لين ذاك الوقت، تدرّب على مستر أولمبيا 2026: اختار أول 3، وبعدها شوف النتائج الحقيقية.",
+  "Olympia 2026 top 5": "أول 5 في أولمبيا 2026", "Olympia 2026": "أولمبيا 2026", "Most possible": "أعلى نقاط ممكنة", "Real results": "النتائج الحقيقية",
+  "The real Olympia 2026 results are in. Open each division to see your points.": "نزلت نتائج أولمبيا 2026 الحقيقية. افتح كل فئة وشوف نقاطك.",
+  "When you have made your picks, bring in the real Olympia 2026 results to see your points.": "بعد ما تختار توقعاتك، طلّع نتائج أولمبيا 2026 الحقيقية وشوف نقاطك.",
+  "Show the real results": "اعرض النتائج الحقيقية", "Real results are in": "نزلت النتائج الحقيقية",
+  "The practice round uses the real Mr. Olympia 2026 top 5 and results. Points with friends start when real accounts are ready.": "جولة التدريب فيها أول 5 الحقيقيين في مستر أولمبيا 2026 ونتايجهم. النقاط مع ربعك تبدأ أول ما تجهز الحسابات الحقيقية.",
+  "Featured athletes": "لاعبين مميزين", "Photos and details are added with each athlete’s permission.": "الصور والتفاصيل تنضاف بموافقة كل لاعب.",
+  "Mike Sommerfeld": "مايك سومرفيلد", "Ramon Dino": "رامون دينو", "Terrence Ruffin": "تيرينس رافين", "Wesley Vissers": "ويسلي فيسرز",
+  "Ali Bilal": "علي بلال", "Brandon Hendrickson": "براندون هندريكسون", "Erin Banks": "إيرين بانكس", "Kyron Holden": "كايرون هولدن",
+  "Andrew Jacked": "أندرو جاكد", "Tonio Burton": "تونيو بيرتون"
+});
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
 AR_RX.push([/^(.+) Pro (\d{4})$/, (m, a, y) => (AR[a] ? `${AR[a]} برو ${y}` : m)]);
