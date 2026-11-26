@@ -40,6 +40,7 @@ BB365 is a men's bodybuilding app for Kuwait and Saudi Arabia, in the spirit of 
 Changes go live only when they reach `main`. If you worked on a branch, tell the owner in plain words how to merge the pull request (or ask him whether you may push to `main`).
 
 ## Ideas he has asked about for later
+- Pictures made with ElevenLabs and kept in `design/` (see its README): a 3D gold pose figure to replace the athlete picture, and four 3D BB365 logos. Put them in the app only when he says so ("حطها").
 - Live results room: an admin page to enter placings at the venue, shown instantly to everyone (needs Supabase; he has not created the account yet).
 - Streams robot (YouTube API key) and adding stream links in the weekly check.
 - Real accounts, real registrations and tickets for events he partners with, payments (KNET / mada) after a commercial licence.
