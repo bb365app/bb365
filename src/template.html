@@ -872,7 +872,9 @@ const DIV_ID = { "Men's Open": "open", "212": "212", "212 Bodybuilding": "212", 
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 const whenT = (s) => { const m = String(s).match(/([A-Z][a-z]{2})[a-z]* (\d{1,2})[^,]*, (\d{4})/); return m && m[1] in MON ? +new Date(+m[3], MON[m[1]], +m[2]) : 0; };
 const GULF = ["Kuwait", "Saudi Arabia", "UAE", "Bahrain", "Oman", "Qatar"];
-let PROS_ = null;
+let PROS_ = null, FVA = null; // FVA: athletes.json once it has loaded
+const FV_ATH = "https://fitnessvolt.com/bodybuilding/athletes/", FV_CON = "https://fitnessvolt.com/bodybuilding/contests/";
+const FV_DIV = { "Men's Open Bodybuilding": "open", "Men's Classic Physique": "classic", "Men's Physique": "physique", "Men's 212 Bodybuilding": "212", "Wheelchair": "wheelchair", "Men's Wheelchair": "wheelchair" };
 const PROS = () => {
   if (PROS_) return PROS_;
   const out = {};
@@ -886,40 +888,51 @@ const PROS = () => {
     Object.keys(e.res).forEach((d) => (e.res[d] || []).forEach(([n, c], i) => add(n, c, { evId: e.id, ev: e.name, loc: e.place, date: e.date, t: +e.start || 0, div: d, place: e.resKind === "procards" ? 0 : i + 1, url, src: srcName(url, e.src) }))); });
   RESULTS.forEach((r) => { const ev = EVENTS.find((e) => e.name === r.ev); const [loc, date] = r.when.split(" · ");
     r.wins.forEach(([d, w]) => { const [n, c] = w.split(" · "); add(n, c || "", { evId: ev ? ev.id : "", ev: r.ev, loc, date: date || "", t: whenT(r.when), div: DIV_ID[d] || d, place: 1, url: r.url, src: r.src }); }); });
-  Object.values(out).forEach((a) => { a.rows.sort((x, y) => y.t - x.t || (x.place || 99) - (y.place || 99)); a.best = Math.min(...a.rows.map((r) => r.place || 1.5)); /* a pro card (winning an amateur class) sorts between 1st and 2nd */ });
+  // full professional records (athletes.json): they replace the few rows above for the same athlete
+  if (FVA) FVA.athletes.forEach((x) => {
+    if (!x || typeof x.name !== "string" || !Array.isArray(x.rows) || !/^[a-z0-9-]+$/.test(x.id || "")) return;
+    const k = athKey(x.name, ""); const id = out[k] && !out[k].fv && !ATH_APART.includes(k) ? k : out[x.id] ? null : x.id; if (!id) return;
+    const a = out[id] || (out[id] = { id, name: x.name, country: "", handle: "", rows: [], auto: true });
+    if (typeof x.country === "string" && x.country) a.country = a.handle = x.country;
+    a.fv = FV_ATH + x.id + "/"; a.div = typeof x.div === "string" ? x.div : "";
+    a.rows = x.rows.filter((r) => Array.isArray(r) && r.length >= 5).map(([y, c, slug, d, pl], i) => { const ev = String(c).replace(/^\d{4}\s+/, ""); const app = EVENTS.find((e) => e.name === ev + " " + y);
+      return { evId: app ? app.id : "", ev, loc: "", date: String(+y || ""), t: +new Date(+y || 2000, 0, 1) + (999 - i), div: FV_DIV[d] || String(d), place: Number.isInteger(pl) && pl > 0 ? pl : null, url: /^[a-z0-9-]+$/.test(slug || "") ? FV_CON + slug + "/" : a.fv, src: FV }; });
+  });
+  Object.values(out).forEach((a) => { a.rows.sort((x, y) => y.t - x.t || (x.place || 99) - (y.place || 99)); a.best = Math.min(...a.rows.map((r) => r.place === null ? 99 : r.place || 1.5)); /* a pro card (winning an amateur class) sorts between 1st and 2nd */ });
   return (PROS_ = out);
 };
 const athOf = (id) => ATH[id] || PROS()[id];
 const athLink = (name, evId) => PROS()[athKey(name, evId)] ? "#athlete-" + athKey(name, evId) : "";
-const placeBadge = (p) => p ? `<div class="medal" style="color:${medalColor(p - 1)};border-color:${medalColor(p - 1)}">${p}</div>` : `<span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span>`;
+const placeBadge = (p) => p ? `<div class="medal" style="color:${medalColor(p - 1)};border-color:${medalColor(p - 1)}">${p}</div>` : p === null ? `<div class="medal" style="color:#8E8E99;border-color:#3A3A42">–</div>` : `<span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span>`;
 const athSort = (list) => { const mine = S.country === "sa" ? "Saudi Arabia" : "Kuwait"; const g = (a) => a.country === mine ? 0 : GULF.includes(a.country) ? 1 : 2;
   return list.slice().sort((a, b) => g(a) - g(b) || a.best - b.best || b.rows.length - a.rows.length || a.name.localeCompare(b.name)); };
 
-/* Rankings from the real results above. Most 1st places first, then 2nd, then 3rd (like a medal table).
-   When tied, the Olympia counts above other pro shows, and pro shows come before amateur pro cards. Equal records share a number. */
-const evLevel = (r) => /olympia/i.test(r.ev) ? 3 : r.place === 0 ? 1 : 2;
+/* Rankings: most 1st places first, then 2nd, then 3rd, then the best other placing, then how many placings.
+   Every contest counts the same (the owner asked for no extra weight for the Olympia). Equal records share a number. */
 const RK_TABS = [["kw", "Kuwait"], ["sa", "Saudi Arabia"], ["gulf", "Gulf"], ["world", "World level"]];
 const RK_NO1 = { kw: "Kuwait No. 1", sa: "Saudi No. 1", gulf: "Gulf No. 1", world: "World No. 1" };
-const rkKey = (a) => { const k = []; [1, 2, 3].forEach((p) => { const f = a.rows.filter((r) => r.place === p); k.push(f.length, f.reduce((s, r) => s + evLevel(r), 0)); });
-  const best = Math.min(...a.rows.map((r) => r.place || 50)); k.push(-best, Math.max(...a.rows.filter((r) => (r.place || 50) === best).map(evLevel))); return k; };
-const rkCmp = (a, b) => { const x = rkKey(a), y = rkKey(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return y[i] - x[i]; return b.rows.length - a.rows.length || a.name.localeCompare(b.name); };
-const rkList = (t) => { const list = Object.values(PROS()).filter((a) => t === "world" || (t === "gulf" ? GULF.includes(a.country) : a.country === (t === "sa" ? "Saudi Arabia" : "Kuwait"))).sort(rkCmp).slice(0, 100);
-  let prev = "", n = 0; return list.map((a, i) => { const k = rkKey(a).join(); if (k !== prev) { n = i + 1; prev = k; } return [a, n]; }); };
-const bestRow = (a) => a.rows.slice().sort((x, y) => (x.place || 50) - (y.place || 50) || evLevel(y) - evLevel(x))[0];
-const placeTxt = (r) => r.place ? ordEn(r.place) : "Pro card";
-const rkRow = ([a, n]) => { const r = bestRow(a);
-  return `<a href="#athlete-${a.id}" class="rowcard"><div class="medal" style="color:${medalColor(n - 1)};border-color:${medalColor(n - 1)}">${n}</div><div style="flex:1;min-width:0"><b dir="auto">${esc(a.name)}</b><div class="muted" style="font-size:12px;margin-top:2px;line-height:1.4">${a.country ? `<span>${esc(a.country)}</span> · ` : ""}<span>${esc(r.ev)}</span></div></div><b style="flex:none;font-size:13px;color:${r.place ? medalColor(r.place - 1) : "var(--gold-2)"}">${placeTxt(r)}</b></a>`; };
+const nPlace = (a, p) => a.rows.filter((r) => r.place === p).length;
+const rkKey = (a) => [nPlace(a, 1), nPlace(a, 2), nPlace(a, 3), -Math.min(...a.rows.map((r) => r.place === null ? 99 : r.place || 50)), a.rows.filter((r) => r.place).length];
+const rkList = (t) => { const keys = new Map();
+  const list = Object.values(PROS()).filter((a) => t === "world" || (t === "gulf" ? GULF.includes(a.country) : a.country === (t === "sa" ? "Saudi Arabia" : "Kuwait")));
+  list.forEach((a) => keys.set(a, rkKey(a)));
+  list.sort((a, b) => { const x = keys.get(a), y = keys.get(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return y[i] - x[i]; return a.name.localeCompare(b.name); });
+  let prev = "", n = 0; return list.slice(0, 100).map((a, i) => { const k = keys.get(a).join(); if (k !== prev) { n = i + 1; prev = k; } return [a, n]; }); };
+const bestRow = (a) => a.rows.slice().sort((x, y) => (x.place === null ? 99 : x.place || 50) - (y.place === null ? 99 : y.place || 50) || y.t - x.t)[0];
+const placeTxt = (r) => r.place ? ordEn(r.place) : r.place === 0 ? "Pro card" : "Unplaced";
+const mainDiv = (a) => FV_DIV[a.div] ? DIV_NAMES[FV_DIV[a.div]] : a.div || DIV_NAMES[a.rows[0].div] || a.rows[0].div;
+const rkRow = ([a, n]) => { const w = nPlace(a, 1);
+  return `<a href="#athlete-${a.id}" class="rowcard"><div class="medal" style="color:${medalColor(n - 1)};border-color:${medalColor(n - 1)}">${n}</div><div style="flex:1;min-width:0"><b dir="auto">${esc(a.name)}</b><div class="muted" style="font-size:12px;margin-top:2px;line-height:1.4">${a.country ? `<span>${esc(a.country)}</span> · ` : ""}<span>${esc(mainDiv(a))}</span></div></div><div style="flex:none;text-align:center;min-width:44px"><b class="num" style="font-size:18px;color:${w ? "var(--gold-2)" : "#8E8E99"}">${w}</b><div class="muted" style="font-size:11px">Wins</div></div></a>`; };
 const rankScreen = () => {
   const t = RK_TABS.some(([k]) => k === S.rk) ? S.rk : S.country === "sa" ? "sa" : "kw";
   const list = rkList(t); const lead = list[0]; const tied = lead ? list.filter(([, n]) => n === 1).length - 1 : 0;
-  const shows = new Set(Object.values(PROS()).flatMap((a) => a.rows.map((r) => r.ev))).size;
   return `
   <div class="scroll view-in"><div class="toolhead"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 tabindex="-1" data-focus>Rankings</h1><span style="width:44px"></span></div>
     <div class="seg" role="group" aria-label="Ranking">${RK_TABS.map(([k, l]) => `<button aria-pressed="${t === k}" data-act="rk" data-v="${k}">${l}</button>`).join("")}</div>
-    ${lead ? `<div class="sec"><a href="#athlete-${lead[0].id}" class="pc" style="height:240px">${athPh()}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} ${RK_NO1[t]}</span><div class="pc-title" dir="auto" style="font-size:34px">${esc(lead[0].name)}</div><div class="pc-sub"><span>${placeTxt(bestRow(lead[0]))}</span> · <span>${esc(bestRow(lead[0]).ev)}</span></div>${tied ? `<div class="pc-sub"><span>Tied at No. 1:</span> <span>${tied + 1}</span></div>` : ""}</div></a></div>` : ""}
+    ${lead ? `<div class="sec"><a href="#athlete-${lead[0].id}" class="pc" style="height:240px">${athPh()}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} ${RK_NO1[t]}</span><div class="pc-title" dir="auto" style="font-size:34px">${esc(lead[0].name)}</div><div class="pc-sub"><span>Wins:</span> <b>${nPlace(lead[0], 1)}</b> · <span>2nd place</span> <b>${nPlace(lead[0], 2)}</b> · <span>3rd place</span> <b>${nPlace(lead[0], 3)}</b></div>${tied ? `<div class="pc-sub"><span>Tied at No. 1:</span> <span>${tied + 1}</span></div>` : ""}</div></a></div>` : ""}
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>${(RK_TABS.find(([k]) => k === t) || [])[1]}</h2><span class="chip">${list.length}</span></div>
       ${list.length ? list.map(rkRow).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">No athletes here yet.</div>`}
-      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;line-height:1.55;color:#C9C9D1;font-size:13px"><b style="color:var(--text)">How the ranking works</b><span>Most first places come first, then second places, then third.</span><span>When two are tied, the Olympia counts above other shows, and pro shows come before amateur pro cards.</span><span><span>Shows counted so far:</span> <b>${shows}</b>. More are added as their results are checked.</span></div></div>
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;line-height:1.55;color:#C9C9D1;font-size:13px"><b style="color:var(--text)">How the ranking works</b><span>Most first places come first, then second places, then third.</span><span>Every professional contest counts, from each athlete’s first show until now.</span>${FVA ? `<span>Source: the Fitness Volt pro database, recorded from NPC Contests and the IFBB Pro League.</span><span><span>Updated:</span> <bdi>${esc(FVA.updated || "")}</bdi></span>${xl(FV_ATH, "Fitness Volt")}` : ""}</div></div>
     <div class="sec"><div class="sec-h"><h2>Featured athletes</h2></div><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 200)).join("")}</div>
     <p class="note" style="padding:0">Photos and details are added with each athlete’s permission.</p></div>
   </div>${tabbar("home")}`;
@@ -935,9 +948,9 @@ const proPage = (a) => {
   const row = (r) => { const ev = r.evId && EVopen(r.evId);
     return `<div class="rowcard" style="align-items:flex-start">${placeBadge(r.place)}<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
       ${ev ? `<a href="#event-${ev.id}" style="font-weight:700;line-height:1.3">${esc(r.ev)}</a>` : `<b style="line-height:1.3">${esc(r.ev)}</b>`}
-      <div class="muted" style="font-size:12px;line-height:1.5"><span>${DIV_NAMES[r.div] || esc(r.div)}</span> · <span>${esc(r.loc)}</span> · <span>${esc(r.date)}</span></div>
+      <div class="muted" style="font-size:12px;line-height:1.5"><span>${DIV_NAMES[r.div] || esc(r.div)}</span>${r.loc ? ` · <span>${esc(r.loc)}</span>` : ""} · <span>${esc(r.date)}</span></div>
       <div style="font-size:12px">${xl(r.url, r.src)}</div></div>
-      <b style="flex:none;color:${r.place ? medalColor(r.place - 1) : "var(--gold-2)"}">${r.place ? ordEn(r.place) : "Pro card"}</b></div>`; };
+      <b style="flex:none;color:${r.place ? medalColor(r.place - 1) : r.place === 0 ? "var(--gold-2)" : "#8E8E99"}">${placeTxt(r)}</b></div>`; };
   return `
   <div class="scroll view-in" style="gap:22px;padding-bottom:20px">
     <div class="cover" style="height:290px">${athPh()}
@@ -949,6 +962,7 @@ const proPage = (a) => {
       <div class="two" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${[[n(1), "Wins", 0], [n(2), "2nd place", 1], [n(3), "3rd place", 2]].map(([v, l, i]) => `<div class="fact" style="align-items:center;text-align:center"><span style="color:${medalColor(i)}">${ic("trophy", 24)}</span><b class="disp" style="font-size:26px;color:${medalColor(i)}">${v}</b><span>${l}</span></div>`).join("")}</div>
       <div class="sec-h"><h2>Results</h2><span class="chip">${a.rows.length}</span></div>
       ${a.rows.map(row).join("")}
+      ${a.fv ? `<div style="font-size:13px">${xl(a.fv, "Full record · Fitness Volt")}</div>` : ""}
       <p class="note" style="padding:0">Only results from published sources, each with its link. More shows are added as they are checked.</p>
     </div>
   </div>
@@ -2850,6 +2864,24 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
     if (n && ["events", "home", "event", "search"].includes(route()[0])) render(true);
   } catch (e) {}
 })();
+/* athletes.json: full professional records (men) from the Fitness Volt database, written by scripts/fetch_athletes.py.
+   athletes_ar.json: Arabic for athlete names, contest names and the words inside them. */
+(async () => {
+  if (!/^https?:$/.test(location.protocol)) return;
+  try {
+    const [r, ra] = await Promise.all([fetch("athletes.json", { cache: "no-cache" }), fetch("athletes_ar.json", { cache: "no-cache" }).catch(() => null)]);
+    if (ra && ra.ok) { const j = await ra.json(); ["names", "contests", "divisions"].forEach((k) => { if (j && j[k] && typeof j[k] === "object") Object.entries(j[k]).forEach(([en, ar]) => { if (typeof en === "string" && typeof ar === "string" && ar && !AR[en]) AR[en] = ar; }); });
+      if (j && j.words && typeof j.words === "object") Object.assign(FV_WORDS, j.words); }
+    if (!r.ok) return; const j = await r.json(); if (!j || !Array.isArray(j.athletes)) return;
+    // contest names: translated word by word when every word is known (numbers stay as they are)
+    j.athletes.forEach((x) => (x && Array.isArray(x.rows) ? x.rows : []).forEach((row) => { if (!Array.isArray(row)) return; const c = String(row[1]).replace(/^\d{4}\s+/, ""); const w = c.split(" ");
+      if (!AR[c] && w.every((x) => /^\d+$/.test(x) || FV_WORDS[x])) AR[c] = w.map((x) => FV_WORDS[x] || x).join(" "); }));
+    FVA = { updated: String(j.updated || ""), athletes: j.athletes }; PROS_ = null;
+    if (["rankings", "athletes", "athlete", "search", "event", "home"].includes(route()[0])) render(true);
+  } catch (e) {}
+})();
+const FV_WORDS = {}; // words inside contest names, from athletes_ar.json
+AR_RX.push([/^(\d+)(?:st|nd|rd|th)$/, (m, n) => `المركز ${n}`]);
 Object.assign(AR, {
   "Real picks open when the start list is published. Until then, practise on Mr. Olympia 2026: pick the top 3, then see the real results.": "التوقعات الحقيقية تفتح أول ما تنتشر قائمة المشاركين. لين ذاك الوقت، تدرّب على مستر أولمبيا 2026: اختار أول 3، وبعدها شوف النتائج الحقيقية.",
   "Olympia 2026 top 5": "أول 5 في أولمبيا 2026", "Olympia 2026": "أولمبيا 2026", "Most possible": "أعلى نقاط ممكنة", "Real results": "النتائج الحقيقية",
@@ -2879,7 +2911,9 @@ Object.assign(AR, {
   "Predictions are completely free: no entry fee, no betting and no cash prizes.": "التوقعات مجانية بالكامل: بدون رسوم دخول، ولا رهان، ولا جوائز مالية."
 });
 Object.assign(AR, {
-  "Athletes with results": "لاعبين عندهم نتايج", "World level": "مستوى عالمي", "Kuwait No. 1": "الأول في الكويت", "Saudi No. 1": "الأول في السعودية", "Gulf No. 1": "الأول في الخليج", "World No. 1": "الأول عالمياً",
+  "Athletes with results": "لاعبين عندهم نتايج", "Unplaced": "بدون مركز", "Full record · Fitness Volt": "السجل الكامل · Fitness Volt", "Wins:": "الانتصارات:", "Updated:": "آخر تحديث:",
+  "Every professional contest counts, from each athlete’s first show until now.": "كل بطولات المحترفين محسوبة، من أول بطولة للاعب لين اليوم.",
+  "Source: the Fitness Volt pro database, recorded from NPC Contests and the IFBB Pro League.": "المصدر: قاعدة بيانات Fitness Volt للمحترفين، ونتايجها من NPC Contests وIFBB Pro League.", "World level": "مستوى عالمي", "Kuwait No. 1": "الأول في الكويت", "Saudi No. 1": "الأول في السعودية", "Gulf No. 1": "الأول في الخليج", "World No. 1": "الأول عالمياً",
   "Tied at No. 1:": "متعادلين على المركز الأول:", "How the ranking works": "شلون ينحسب التصنيف", "Most first places come first, then second places, then third.": "اللي عنده مراكز أولى أكثر يكون فوق، بعدين المراكز الثانية، بعدين الثالثة.",
   "When two are tied, the Olympia counts above other shows, and pro shows come before amateur pro cards.": "إذا تعادلوا، الأولمبيا تحسب أكثر من باقي البطولات، وبطولات المحترفين قبل كروت المحترفين من بطولات الهواة.",
   "Shows counted so far:": "عدد البطولات المحسوبة للحين:", "More are added as their results are checked.": "ونضيف بطولات زيادة أول ما نتأكد من نتايجها.", "Gulf": "الخليج", "No athletes here yet.": "ما في لاعبين هني للحين.", "All athletes": "كل اللاعبين",
