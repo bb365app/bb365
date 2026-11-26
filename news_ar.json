@@ -1,19 +1,19 @@
 {
- "note": "Arabic headlines for news.json, keyed by the story link. Filled by the translation check; the app shows them when the language is Arabic.",
- "titles": {
-  "https://fitnessvolt.com/urs-kalecinski-contest-plans-and-trains-back-with-dorian-yates/": "أورس كاليتشينسكي بوزن 300 رطل يكشف خططه لبطولات 2027 ويتمرّن ظهر مع دوريان ييتس",
-  "https://fitnessvolt.com/nick-walker-high-carb-diet-2027-arnold-classic/": "نيك ووكر يشرح يومه الغذائي العالي بالكارب قبل 14.5 أسبوع من أرنولد كلاسيك 2027",
-  "https://www.muscleandfitness.com/flexonline/flex-news/when-was-ronnie-colemans-best-year-tmp-picks-the-bodybuilding-icons-greatest-stage-look/": "متى كانت أفضل سنة لروني كولمان؟ برنامج TMP يختار أقوى ظهور له على المسرح",
-  "https://www.muscleandfitness.com/flexonline/flex-news/2026-amateur-olympia-las-vegas-results/": "نتائج أولمبيا الهواة 2026 في لاس فيغاس",
-  "https://fitnessvolt.com/2026-spanish-grand-prix-pro-results/": "نتائج جائزة إسبانيا الكبرى للمحترفين 2026: توميسلاف ستريمتسكي يفوز بالكلاسيك فيزيك",
-  "https://www.muscleandfitness.com/flexonline/training/andrew-jacked-shares-his-back-building-training-ahead-of-the-arnold-classic/": "أندرو جاكد يشارك تمرين بناء الظهر قبل أرنولد كلاسيك",
-  "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/hany-rambod-shares-his-top-rule-for-building-wider-shoulders/": "هاني رامبود يكشف أهم قاعدة لأكتاف أعرض",
-  "https://www.muscleandfitness.com/workouts/workout-routines/nick-walker-shares-his-pre-arnold-classic-upper-body-workout/": "نيك ووكر يشارك تمرين الجزء العلوي قبل أرنولد كلاسيك",
-  "https://www.muscleandfitness.com/flexonline/training/how-reverse-grip-lat-pulldowns-helped-jay-cutler-build-an-even-wider-back/": "كيف ساعد سحب الظهر بالقبضة العكسية جاي كاتلر على بناء ظهر أعرض",
-  "https://fitnessvolt.com/wesley-vissers-3-chest-moves-for-2027-arnold-classic/": "ويسلي فيسرز يكشف 3 تمارين يعتمد عليها لبناء صدر ضخم استعداداً لأرنولد كلاسيك 2027",
-  "https://fitnessvolt.com/sajad-jawad-obituary/": "وفاة لاعب كمال الأجسام العراقي سجاد جواد عن 30 عامًا بعد 3 أيام من فوزه في بطولة",
-  "https://fitnessvolt.com/arnold-schwarzenegger-talks-liquid-creatine-vs-powder/": "أرنولد شوارزنيجر يكشف: هل الكرياتين السائل أفضل من البودرة؟",
-  "https://fitnessvolt.com/iain-valliere-announces-comeback/": "إيان فاليير يعلن عودته وينافس في بطولة بيغ مان ويكند للمحترفين 2026 هذا الأسبوع",
-  "https://fitnessvolt.com/jay-cutler-3d-delt-workout-at-53/": "أسطورة كمال الأجسام جاي كاتلر يستخدم المجموعات الهرمية لبناء أكتاف ثلاثية الأبعاد في عمر 53"
- }
+  "note": "Arabic headlines for news.json, keyed by the story link. Filled by the translation check; the app shows them when the language is Arabic.",
+  "titles": {
+    "https://fitnessvolt.com/urs-kalecinski-contest-plans-and-trains-back-with-dorian-yates/": "أورس كاليتشينسكي بوزن 300 رطل يكشف خططه لبطولات 2027 ويتمرّن ظهر مع دوريان ييتس",
+    "https://www.muscleandfitness.com/flexonline/flex-news/when-was-ronnie-colemans-best-year-tmp-picks-the-bodybuilding-icons-greatest-stage-look/": "متى كانت أفضل سنة لروني كولمان؟ برنامج TMP يختار أقوى ظهور له على المسرح",
+    "https://www.muscleandfitness.com/flexonline/flex-news/2026-amateur-olympia-las-vegas-results/": "نتائج أولمبيا الهواة 2026 في لاس فيغاس",
+    "https://www.muscleandfitness.com/flexonline/training/andrew-jacked-shares-his-back-building-training-ahead-of-the-arnold-classic/": "أندرو جاكد يشارك تمرين بناء الظهر قبل أرنولد كلاسيك",
+    "https://www.muscleandfitness.com/athletes-celebrities/pro-tips/hany-rambod-shares-his-top-rule-for-building-wider-shoulders/": "هاني رامبود يكشف أهم قاعدة لأكتاف أعرض",
+    "https://www.muscleandfitness.com/workouts/workout-routines/nick-walker-shares-his-pre-arnold-classic-upper-body-workout/": "نيك ووكر يشارك تمرين الجزء العلوي قبل أرنولد كلاسيك",
+    "https://www.muscleandfitness.com/flexonline/training/how-reverse-grip-lat-pulldowns-helped-jay-cutler-build-an-even-wider-back/": "كيف ساعد سحب الظهر بالقبضة العكسية جاي كاتلر على بناء ظهر أعرض",
+    "https://fitnessvolt.com/wesley-vissers-3-chest-moves-for-2027-arnold-classic/": "ويسلي فيسرز يكشف 3 تمارين يعتمد عليها لبناء صدر ضخم استعداداً لأرنولد كلاسيك 2027",
+    "https://fitnessvolt.com/sajad-jawad-obituary/": "وفاة لاعب كمال الأجسام العراقي سجاد جواد عن 30 عامًا بعد 3 أيام من فوزه في بطولة",
+    "https://fitnessvolt.com/arnold-schwarzenegger-talks-liquid-creatine-vs-powder/": "أرنولد شوارزنيجر يكشف: هل الكرياتين السائل أفضل من البودرة؟",
+    "https://fitnessvolt.com/iain-valliere-announces-comeback/": "إيان فاليير يعلن عودته وينافس في بطولة بيغ مان ويكند للمحترفين 2026 هذا الأسبوع",
+    "https://fitnessvolt.com/jay-cutler-3d-delt-workout-at-53/": "أسطورة كمال الأجسام جاي كاتلر يستخدم المجموعات الهرمية لبناء أكتاف ثلاثية الأبعاد في عمر 53",
+    "https://fitnessvolt.com/sam-sulek-reveals-2027-physique-goals/": "سام سوليك يكشف أهدافه البدنية لعام 2027 ويطمح إلى مظهر يشبه رامون دينو",
+    "https://fitnessvolt.com/jeff-cavaliere-shares-10-exercises-mistakes-to-fix/": "جيف كافالير يشرح 10 أخطاء في التمارين تعيق تقدمك العضلي"
+  }
 }
