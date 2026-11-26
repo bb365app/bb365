@@ -956,8 +956,6 @@ const rankScreen = () => {
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>${(RK_TABS.find(([k]) => k === t) || [])[1]}</h2><span class="chip">${list.length}</span></div>
       ${list.length ? list.map(rkRow).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">No athletes here yet.</div>`}
       <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;line-height:1.55;color:#C9C9D1;font-size:13px"><b style="color:var(--text)">How the ranking works</b><span>Most first places come first, then second places, then third.</span><span>Every professional contest counts, from each athlete’s first show until now.</span>${FVA ? `<span>Source: the Fitness Volt pro database, recorded from NPC Contests and the IFBB Pro League.</span><span><span>Updated:</span> <bdi>${esc(FVA.updated || "")}</bdi></span>${xl(FV_ATH, "Fitness Volt")}` : ""}</div></div>
-    <div class="sec"><div class="sec-h"><h2>Featured athletes</h2></div><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 200)).join("")}</div>
-    <p class="note" style="padding:0">Photos and details are added with each athlete’s permission.</p></div>
   </div>${tabbar("home")}`;
 };
 SCREENS.athletes = rankScreen;
