@@ -34,6 +34,7 @@ BB365 is a men's bodybuilding app for Kuwait and Saudi Arabia, in the spirit of 
 - `.github/workflows/publish.yml` runs the robots and publishes to GitHub Pages on every push to `main` and every hour.
 
 ## Publishing
+- **Owner's rule (Nov 26, 2026): show every change first, publish only after he says yes.** Make the change, rebuild, then show him screenshots (phone size, Arabic) and update the in-Claude preview artifact. Do NOT push app changes to `main` (the live site) until he approves in chat. Ask: "أنزله على الموقع؟"
 Changes go live only when they reach `main`. If you worked on a branch, tell the owner in plain words how to merge the pull request (or ask him whether you may push to `main`).
 
 ## Ideas he has asked about for later
