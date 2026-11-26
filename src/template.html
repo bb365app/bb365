@@ -479,7 +479,7 @@ const figure = () => `<svg viewBox="60 20 280 260" preserveAspectRatio="xMidYMax
 const IMG = {
   splash: "__IMG_splash_art__", ev1: "__IMG_ev1_gold__", ev2: "__IMG_ev2_gold__", ev3: "__IMG_ev3_gold__", ev4: "__IMG_ev4_gold__", ev5: "__IMG_ev5_gold__",
   cv_gulfcrown: "__IMG_cv_gulfcrown__", cv_riyadh: "__IMG_cv_riyadh__", cv_arabian: "__IMG_cv_arabian__", cv_gulfpro: "__IMG_cv_gulfpro__", cv_royalcup: "__IMG_cv_royalcup__", cv_empire: "__IMG_cv_empire__", cv_kwpro26: "__IMG_cv_kwpro26__", cv_saudipro: "__IMG_cv_saudipro__", cv_arnold27: "__IMG_cv_arnold27__", cv_arnolduk27: "__IMG_cv_arnolduk27__", cv_olympia26: "__IMG_cv_olympia26__", cv_spain: "__IMG_cv_spain__", cv_hangzhou: "__IMG_cv_hangzhou__", cv_taiwan: "__IMG_cv_taiwan__", cv_safrica: "__IMG_cv_safrica__", cv_austria: "__IMG_cv_austria__", cv_beijing: "__IMG_cv_beijing__", cv_argentina: "__IMG_cv_argentina__", cv_mumbai: "__IMG_cv_mumbai__", cv_generic: "__IMG_cv_generic__", tl_coach: "__IMG_tl_coach__", tl_nutrition: "__IMG_tl_nutrition__", tl_studies: "__IMG_tl_studies__", tl_facts: "__IMG_tl_facts__", tl_prep: "__IMG_tl_prep__", tl_progress: "__IMG_tl_progress__", tl_onerm: "__IMG_tl_onerm__", tl_bodyfat: "__IMG_tl_bodyfat__",
-  ath_karim: "__IMG_ath_karim__", ath_marcus: "__IMG_ath_marcus__",
+  ath_karim: "__IMG_ath_karim__", ath_marcus: "__IMG_ath_marcus__", ath_cover: "__IMG_ath_cover__",
   club_shpooov: "__IMG_club_shpooov__", club_oxygen: "__IMG_club_oxygen__",
   prod_snickers: "__IMG_prod_snickers__", prod_critical: "__IMG_prod_critical__"
 };
@@ -672,7 +672,9 @@ const evCard = (e, h, w) => `
     <div class="pc-body"><div>${evChip(e)}</div><div class="pc-title">${esc(e.name)}</div>
       <div class="pc-sub">${ic("pin", 14)}<span>${esc(e.place)} · ${esc(e.date)}</span></div></div>
   </a>`;
-const athPhoto = (a) => a.photo ? `<img src="${IMG[a.photo]}" alt="" loading="lazy">` : `<div class="ph">${figure()}</div>`;
+// athletes without their own photo: a back pose (face hidden) under a stage light, BB365 behind him (made from ev1_gold.jpg)
+const athPh = () => `<img src="${IMG.ath_cover}" alt="" loading="lazy" style="object-position:50% 0">`;
+const athPhoto = (a) => a.photo ? `<img src="${IMG[a.photo]}" alt="" loading="lazy">` : athPh();
 const athCard = (a, h, w) => `
   <a href="#athlete-${a.id}" class="pc" style="height:${h}px${w ? `;width:${w}px` : ""}">
     ${athPhoto(a)}
@@ -787,7 +789,7 @@ SCREENS.home = () => {
     ${f === "all" ? nextCard() : ""}
 
     ${on("results") && !AUTO.res.length ? topStory() : ""}
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2><a href="#athletes" class="link">Athletes</a></div>${S.country === "kw" ? kwProCard() : S.country === "sa" ? saCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
+    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2><a href="#rankings" class="link">Rankings</a></div>${S.country === "kw" ? kwProCard() : S.country === "sa" ? saCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
 
     ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
@@ -890,22 +892,39 @@ const PROS = () => {
 const athOf = (id) => ATH[id] || PROS()[id];
 const athLink = (name, evId) => PROS()[athKey(name, evId)] ? "#athlete-" + athKey(name, evId) : "";
 const placeBadge = (p) => p ? `<div class="medal" style="color:${medalColor(p - 1)};border-color:${medalColor(p - 1)}">${p}</div>` : `<span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span>`;
-const athRow = (a) => `<a href="#athlete-${a.id}" class="rowcard">${placeBadge(a.best === 1.5 ? 0 : a.best)}<div style="flex:1;min-width:0"><b dir="auto">${esc(a.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">${a.country ? `<span>${esc(a.country)}</span> · ` : ""}<span>${DIV_NAMES[a.rows[0].div] || a.rows[0].div}</span></div></div>${ic("chev", 18)}</a>`;
 const athSort = (list) => { const mine = S.country === "sa" ? "Saudi Arabia" : "Kuwait"; const g = (a) => a.country === mine ? 0 : GULF.includes(a.country) ? 1 : 2;
   return list.slice().sort((a, b) => g(a) - g(b) || a.best - b.best || b.rows.length - a.rows.length || a.name.localeCompare(b.name)); };
 
-SCREENS.athletes = () => { const f = S.athF || "all";
-  const list = athSort(Object.values(PROS()).filter((a) => f === "all" || (f === "gulf" ? GULF.includes(a.country) : a.country === f)));
+/* Rankings from the real results above. Most 1st places first, then 2nd, then 3rd (like a medal table).
+   When tied, the Olympia counts above other pro shows, and pro shows come before amateur pro cards. Equal records share a number. */
+const evLevel = (r) => /olympia/i.test(r.ev) ? 3 : r.place === 0 ? 1 : 2;
+const RK_TABS = [["kw", "Kuwait"], ["sa", "Saudi Arabia"], ["gulf", "Gulf"], ["world", "World level"]];
+const RK_NO1 = { kw: "Kuwait No. 1", sa: "Saudi No. 1", gulf: "Gulf No. 1", world: "World No. 1" };
+const rkKey = (a) => { const k = []; [1, 2, 3].forEach((p) => { const f = a.rows.filter((r) => r.place === p); k.push(f.length, f.reduce((s, r) => s + evLevel(r), 0)); });
+  const best = Math.min(...a.rows.map((r) => r.place || 50)); k.push(-best, Math.max(...a.rows.filter((r) => (r.place || 50) === best).map(evLevel))); return k; };
+const rkCmp = (a, b) => { const x = rkKey(a), y = rkKey(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return y[i] - x[i]; return b.rows.length - a.rows.length || a.name.localeCompare(b.name); };
+const rkList = (t) => { const list = Object.values(PROS()).filter((a) => t === "world" || (t === "gulf" ? GULF.includes(a.country) : a.country === (t === "sa" ? "Saudi Arabia" : "Kuwait"))).sort(rkCmp).slice(0, 100);
+  let prev = "", n = 0; return list.map((a, i) => { const k = rkKey(a).join(); if (k !== prev) { n = i + 1; prev = k; } return [a, n]; }); };
+const bestRow = (a) => a.rows.slice().sort((x, y) => (x.place || 50) - (y.place || 50) || evLevel(y) - evLevel(x))[0];
+const placeTxt = (r) => r.place ? ordEn(r.place) : "Pro card";
+const rkRow = ([a, n]) => { const r = bestRow(a);
+  return `<a href="#athlete-${a.id}" class="rowcard"><div class="medal" style="color:${medalColor(n - 1)};border-color:${medalColor(n - 1)}">${n}</div><div style="flex:1;min-width:0"><b dir="auto">${esc(a.name)}</b><div class="muted" style="font-size:12px;margin-top:2px;line-height:1.4">${a.country ? `<span>${esc(a.country)}</span> · ` : ""}<span>${esc(r.ev)}</span></div></div><b style="flex:none;font-size:13px;color:${r.place ? medalColor(r.place - 1) : "var(--gold-2)"}">${placeTxt(r)}</b></a>`; };
+const rankScreen = () => {
+  const t = RK_TABS.some(([k]) => k === S.rk) ? S.rk : S.country === "sa" ? "sa" : "kw";
+  const list = rkList(t); const lead = list[0]; const tied = lead ? list.filter(([, n]) => n === 1).length - 1 : 0;
+  const shows = new Set(Object.values(PROS()).flatMap((a) => a.rows.map((r) => r.ev))).size;
   return `
-  <div class="scroll view-in">
-    <div class="top"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 class="title" tabindex="-1" data-focus style="flex:1">Athletes</h1></div>
+  <div class="scroll view-in"><div class="toolhead"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 tabindex="-1" data-focus>Rankings</h1><span style="width:44px"></span></div>
+    <div class="seg" role="group" aria-label="Ranking">${RK_TABS.map(([k, l]) => `<button aria-pressed="${t === k}" data-act="rk" data-v="${k}">${l}</button>`).join("")}</div>
+    ${lead ? `<div class="sec"><a href="#athlete-${lead[0].id}" class="pc" style="height:240px">${athPh()}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} ${RK_NO1[t]}</span><div class="pc-title" dir="auto" style="font-size:34px">${esc(lead[0].name)}</div><div class="pc-sub"><span>${placeTxt(bestRow(lead[0]))}</span> · <span>${esc(bestRow(lead[0]).ev)}</span></div>${tied ? `<div class="pc-sub"><span>Tied at No. 1:</span> <span>${tied + 1}</span></div>` : ""}</div></a></div>` : ""}
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>${(RK_TABS.find(([k]) => k === t) || [])[1]}</h2><span class="chip">${list.length}</span></div>
+      ${list.length ? list.map(rkRow).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">No athletes here yet.</div>`}
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;line-height:1.55;color:#C9C9D1;font-size:13px"><b style="color:var(--text)">How the ranking works</b><span>Most first places come first, then second places, then third.</span><span>When two are tied, the Olympia counts above other shows, and pro shows come before amateur pro cards.</span><span><span>Shows counted so far:</span> <b>${shows}</b>. More are added as their results are checked.</span></div></div>
     <div class="sec"><div class="sec-h"><h2>Featured athletes</h2></div><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 200)).join("")}</div>
     <p class="note" style="padding:0">Photos and details are added with each athlete’s permission.</p></div>
-    <div class="sec" style="gap:10px"><div class="sec-h"><h2>Athletes with results</h2></div>
-      <div class="seg" style="padding:0" role="group" aria-label="Country">${[["all", "All"], ["Kuwait", "Kuwait"], ["Saudi Arabia", "Saudi Arabia"], ["gulf", "Gulf"]].map(([k, l]) => `<button aria-pressed="${f === k}" data-act="athF" data-v="${k}">${l}</button>`).join("")}</div>
-      ${list.length ? list.map(athRow).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">No athletes here yet.</div>`}
-      <p class="note" style="padding:0">Built only from published results, each with its source. More shows are added as they are checked.</p></div>
-  </div>${tabbar("home")}`; };
+  </div>${tabbar("home")}`;
+};
+SCREENS.athletes = rankScreen;
 
 // a result row in an event: tapping a real athlete opens his page
 const resLink = (e, n, inner) => { const h = e.real ? athLink(n, e.id) : ""; return h ? `<a href="${h}" class="rowcard">${inner}${ic("chev", 16)}</a>` : `<div class="rowcard">${inner}</div>`; };
@@ -921,7 +940,7 @@ const proPage = (a) => {
       <b style="flex:none;color:${r.place ? medalColor(r.place - 1) : "var(--gold-2)"}">${r.place ? ordEn(r.place) : "Pro card"}</b></div>`; };
   return `
   <div class="scroll view-in" style="gap:22px;padding-bottom:20px">
-    <div class="cover" style="height:290px"><div class="ph" style="z-index:-2">${figure()}</div>
+    <div class="cover" style="height:290px">${athPh()}
       <div class="cover-top"><button class="ibtn glass" aria-label="Back" data-act="back">${ic("back")}</button></div>
       <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;flex-direction:column;gap:8px">
         <div class="row g8" style="flex-wrap:wrap">${a.country ? `<span class="chip">${esc(a.country)}</span>` : ""}${divs.map((d) => `<span class="chip gold">${DIV_NAMES[d] || esc(d)}</span>`).join("")}</div>
@@ -933,7 +952,7 @@ const proPage = (a) => {
       <p class="note" style="padding:0">Only results from published sources, each with its link. More shows are added as they are checked.</p>
     </div>
   </div>
-  <div class="cta"><button class="btn ${on ? "line" : "gold"}" style="flex:1" aria-pressed="${on}" data-act="follow" data-v="${a.id}">${on ? "Following" : "Follow"}</button><a href="#athletes" class="btn line">${ic("user", 18)} All athletes</a></div>`;
+  <div class="cta"><button class="btn ${on ? "line" : "gold"}" style="flex:1" aria-pressed="${on}" data-act="follow" data-v="${a.id}">${on ? "Following" : "Follow"}</button><a href="#rankings" class="btn line">${ic("trophy", 18)} Rankings</a></div>`;
 };
 
 SCREENS.athlete = (id) => {
@@ -945,8 +964,8 @@ SCREENS.athlete = (id) => {
   const medals = a.medals ? [[a.medals[0], "Wins", 0], [a.medals[1], "2nd place", 1], [a.medals[2], "3rd place", 2]] : [[dash, "Wins", 0], [dash, "2nd place", 1], [dash, "3rd place", 2]];
   return `
   <div class="scroll view-in" style="gap:22px;padding-bottom:20px">
-    <div class="cover" style="height:340px">${a.photo ? `<img src="${IMG[a.photo]}" alt="">` : `<div class="ph" style="z-index:-2">${figure()}</div>`}
-      <div class="cover-top"><a href="#athletes" class="ibtn glass" aria-label="Back to athletes">${ic("back")}</a>${a.ig ? `<a href="${a.ig}" target="_blank" rel="noopener" class="ibtn glass" aria-label="Open Instagram">${ic("ig")}</a>` : ""}</div>
+    <div class="cover" style="height:340px">${a.photo ? `<img src="${IMG[a.photo]}" alt="">` : athPh()}
+      <div class="cover-top"><button class="ibtn glass" aria-label="Back" data-act="back">${ic("back")}</button>${a.ig ? `<a href="${a.ig}" target="_blank" rel="noopener" class="ibtn glass" aria-label="Open Instagram">${ic("ig")}</a>` : ""}</div>
       <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;flex-direction:column;gap:8px">
         <div class="row g8" style="flex-wrap:wrap">${a.real ? `<span class="chip gold">Profile coming soon</span>` : `<span class="chip">${a.country}</span><span class="chip gold">${a.div}</span>`}</div>
         <h1 class="disp" dir="auto" tabindex="-1" data-focus style="font-weight:800;font-size:42px;line-height:1.05;text-transform:uppercase">${esc(a.name)}</h1>
@@ -1447,7 +1466,7 @@ const liveBoard = () => {
   let body;
   if (L.rows) {
     const [n, c] = L.rows[0]; const a = Object.values(ATH).find((x) => x.name === n);
-    body = `<div class="pc" style="height:210px">${a ? athPhoto(a) : `<div class="ph">${figure()}</div>`}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} 1st · ${cn}</span><div class="pc-title" style="font-size:32px">${esc(n)}</div><div class="pc-sub">${c}</div></div></div>
+    body = `<div class="pc" style="height:210px">${a ? athPhoto(a) : athPh()}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} 1st · ${cn}</span><div class="pc-title" style="font-size:32px">${esc(n)}</div><div class="pc-sub">${c}</div></div></div>
       ${L.rows.slice(1).map(([nm, cc], i) => { const b = Object.values(ATH).find((x) => x.name === nm); const inner = `<div class="medal" style="color:${medalColor(i + 1)};border-color:${medalColor(i + 1)}"><span class="vh">${ORD[i + 1]} place </span>${i + 2}</div><div style="flex:1;min-width:0;font-weight:600">${esc(nm)}</div><span class="muted" style="font-weight:600;letter-spacing:.08em;font-size:12px">${cc}</span>`; return b ? `<a href="#athlete-${b.id}" class="rowcard">${inner}</a>` : `<div class="rowcard">${inner}</div>`; }).join("")}`;
   } else {
     body = `<div class="card" style="padding:22px 16px;text-align:center;line-height:1.5"><b>${L.when}</b><div class="muted" style="margin-top:4px">Placings appear here as soon as the judges confirm them.</div></div>`;
@@ -1475,7 +1494,7 @@ const rankRow = ([n, c, pts, d], i) => {
   return a ? `<a href="#athlete-${a.id}" class="rowcard">${inner}</a>` : `<div class="rowcard">${inner}</div>`;
 };
 
-SCREENS.rankings = () => notFound(); // hidden until real ranking points exist
+SCREENS.rankings = rankScreen; // real results only (the sample table below is no longer shown)
 const rankingsSample = () => {
   const dv = RANKS[S.rankDiv] ? S.rankDiv : "open"; const rows = RANKS[dv]; const lead = rows[0];
   const la = Object.values(ATH).find((x) => x.name === lead[0]); const dn = (CATS.find((c) => c.id === dv) || {}).name;
@@ -1703,7 +1722,7 @@ const ACT = {
   orgF: (v) => { S.orgF = v; },
   orgSet: (v) => { const [k, st] = v.split(":"); if (k[0] === "s") S.org[k] = st; else if (S.regs[+k.slice(1)]) S.regs[+k.slice(1)].status = st; persist(); toast(st === "approved" ? "Entry approved" : st === "rejected" ? "Entry rejected" : "Back to pending"); },
   searchSet: (v) => { S.s.q = v; },
-  athF: (v) => { S.athF = v; render(true); },
+  rk: (v) => { S.rk = v; render(true); },
   follow: (v) => { S.follow[v] = !S.follow[v]; persist(); toast(S.follow[v] ? "You are following this athlete" : "Unfollowed"); },
   alert: (v) => { S.alerts[v] = !S.alerts[v]; },
   plan: (v) => { const [id, p] = v.split(":"); if (S.subs[id]) S.subs[id] = p; else S.plan[id] = p; persist(); },
@@ -2860,7 +2879,10 @@ Object.assign(AR, {
   "Predictions are completely free: no entry fee, no betting and no cash prizes.": "التوقعات مجانية بالكامل: بدون رسوم دخول، ولا رهان، ولا جوائز مالية."
 });
 Object.assign(AR, {
-  "Athletes with results": "لاعبين عندهم نتايج", "Gulf": "الخليج", "No athletes here yet.": "ما في لاعبين هني للحين.", "All athletes": "كل اللاعبين",
+  "Athletes with results": "لاعبين عندهم نتايج", "World level": "مستوى عالمي", "Kuwait No. 1": "الأول في الكويت", "Saudi No. 1": "الأول في السعودية", "Gulf No. 1": "الأول في الخليج", "World No. 1": "الأول عالمياً",
+  "Tied at No. 1:": "متعادلين على المركز الأول:", "How the ranking works": "شلون ينحسب التصنيف", "Most first places come first, then second places, then third.": "اللي عنده مراكز أولى أكثر يكون فوق، بعدين المراكز الثانية، بعدين الثالثة.",
+  "When two are tied, the Olympia counts above other shows, and pro shows come before amateur pro cards.": "إذا تعادلوا، الأولمبيا تحسب أكثر من باقي البطولات، وبطولات المحترفين قبل كروت المحترفين من بطولات الهواة.",
+  "Shows counted so far:": "عدد البطولات المحسوبة للحين:", "More are added as their results are checked.": "ونضيف بطولات زيادة أول ما نتأكد من نتايجها.", "Gulf": "الخليج", "No athletes here yet.": "ما في لاعبين هني للحين.", "All athletes": "كل اللاعبين",
   "Built only from published results, each with its source. More shows are added as they are checked.": "مبنية بس من نتايج منشورة، وكل نتيجة عليها مصدرها. ونضيف بطولات زيادة أول ما نتأكد منها.",
   "Only results from published sources, each with its link. More shows are added as they are checked.": "بس نتايج من مصادر منشورة، وكل وحدة عليها رابطها. ونضيف بطولات زيادة أول ما نتأكد منها.",
   "11th": "الحادي عشر", "12th": "الثاني عشر", "13th": "الثالث عشر", "14th": "الرابع عشر", "15th": "الخامس عشر", "16th": "السادس عشر"
