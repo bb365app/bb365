@@ -752,7 +752,7 @@ const topStory = () => `<div class="sec"><div class="story">
   <div style="font-size:13px;line-height:1.5;color:#D8D8DE">${esc(TOP.note)} Lower score wins.</div>
   ${xl(TOP.url, TOP.src)}</div></div>`;
 const resCard = (r) => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(r.ev)}</b><div class="muted" style="font-size:12px;margin-top:2px">${esc(r.when)}</div></div>${r.local ? '<span class="chip gold">Kuwait</span>' : r.sa ? '<span class="chip gold">Saudi Arabia</span>' : ""}</div>
-  ${r.wins.map(([d, w]) => `<div class="win"><span class="muted">${esc(d)}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}${xl(r.url, r.src)}</div>`;
+  ${r.wins.map(([d, w]) => { const h = athLink(w.split(" · ")[0], (EVENTS.find((e) => e.name === r.ev) || {}).id); return `<${h ? `a href="${h}"` : "div"} class="win"><span class="muted">${esc(d)}</span><b style="text-align:end">${esc(w)}${h ? " " + ic("chev", 14) : ""}</b></${h ? "a" : "div"}>`; }).join("")}${xl(r.url, r.src)}</div>`;
 const champsCard = () => `<div class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1"><b style="font-size:15px">2026 Olympia champions</b><div class="muted" style="font-size:12px;margin-top:2px">Las Vegas · Sep 24–27, 2026</div></div></div>
   <div class="champs">${CHAMPS.map(([d, w]) => `<div class="champ"><span>${esc(d)}</span><b>${esc(w)}</b></div>`).join("")}</div>${xl("https://fitnessvolt.com/2026-mr-olympia-results/", FV)}</div>`;
 const dramaCard = (x) => `<div class="drama"><div class="row" style="justify-content:space-between;gap:10px"><span class="chip live">${ic("flame", 12, 2)} ${esc(x.tag)}</span><span class="muted" style="font-size:12px">${esc(x.date)}</span></div>
@@ -787,7 +787,7 @@ SCREENS.home = () => {
     ${f === "all" ? nextCard() : ""}
 
     ${on("results") && !AUTO.res.length ? topStory() : ""}
-    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2></div>${S.country === "kw" ? kwProCard() : S.country === "sa" ? saCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
+    ${on("results") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Latest results</h2><a href="#athletes" class="link">Athletes</a></div>${S.country === "kw" ? kwProCard() : S.country === "sa" ? saCard() : ""}${AUTO.res.length ? AUTO.res.slice(0, 8).map(autoCard("trophy")).join("") : RESULTS.map(resCard).join("")}${champsCard()}</div>` : ""}
 
     ${on("drama") ? `<div class="sec" style="gap:12px"><div class="sec-h"><h2>Drama</h2></div>${AUTO.drama.slice(0, 6).map(autoCard("flame")).join("")}${DRAMA.map(dramaCard).join("")}</div>` : ""}
 
@@ -835,7 +835,7 @@ SCREENS.event = (id) => {
   } else if (S.evTab === "results") {
     if (e.status === "finished") {
       body = `<div class="seg" style="padding:0" role="group" aria-label="Category">${(e.real && e.res ? (e.divs || Object.keys(e.res)).filter((d) => e.res[d]).map((id) => ({ id, name: DIV_NAMES[id] || id })) : CATS).map((c) => `<button aria-pressed="${S.evCat === c.id}" data-act="evCat" data-v="${c.id}">${c.name}</button>`).join("")}</div>
-        <div style="display:flex;flex-direction:column;gap:10px">${((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).length ? (e.resKind === "procards" ? (e.res[S.evCat] || []).map(([n, c]) => `<div class="rowcard"><span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;font-size:12px">${c}</span></div>`).join("") : ((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).map(([n, c], i) => `<div class="rowcard"><div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;letter-spacing:.08em;font-size:12px">${c}</span></div>`).join("")) : `<div class="card" style="padding:22px 16px;text-align:center"><b>No results in this division</b></div>`}${e.real && e.resNote && e.resNote[S.evCat] ? `<p class="note" style="padding:0">${e.resNote[S.evCat]}</p>` : ""}${e.real && (e.resSrc || e.url) ? xl(e.resSrc || e.url, "Full results") : ""}</div>`;
+        <div style="display:flex;flex-direction:column;gap:10px">${((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).length ? (e.resKind === "procards" ? (e.res[S.evCat] || []).map(([n, c]) => resLink(e, n, `<span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;font-size:12px">${c}</span>`)).join("") : ((e.real ? (e.res || {})[S.evCat] : RES[S.evCat]) || []).map(([n, c], i) => resLink(e, n, `<div class="medal" style="color:${medalColor(i)};border-color:${medalColor(i)}">${i + 1}</div><div style="flex:1;min-width:0;font-weight:600">${esc(n)}</div><span class="muted" style="font-weight:600;letter-spacing:.08em;font-size:12px">${c}</span>`)).join("")) : `<div class="card" style="padding:22px 16px;text-align:center"><b>No results in this division</b></div>`}${e.real && e.resNote && e.resNote[S.evCat] ? `<p class="note" style="padding:0">${e.resNote[S.evCat]}</p>` : ""}${e.real && (e.resSrc || e.url) ? xl(e.resSrc || e.url, "Full results") : ""}</div>`;
     } else if (e.status === "live") {
       body = `<div style="display:flex;flex-direction:column;gap:14px">${liveBoard()}</div><p class="note" style="padding:0">Sample live results for the demo.</p>`;
     } else {
@@ -860,14 +860,84 @@ SCREENS.event = (id) => {
   </div>${cta ? `<div class="cta">${cta}${e.tickets ? `<a href="#tickets-${e.id}" class="btn line">${ic("ticket", 18)} Tickets</a>` : ""}</div>` : ""}`;
 };
 
-SCREENS.athletes = () => `
+/* ============ Athlete pages built only from the real results in this file (each row keeps its own source link) ============ */
+const aslug = (n) => String(n).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const srcName = (url, fb) => /fitnessvolt\.com/.test(url) ? FV : /generationiron\.com/.test(url) ? GI : /ifbbpro\.com/.test(url) ? "IFBB Pro League" : fb || "Source";
+// The same name at two shows is joined into one page. Names here stay apart (one page per show) because no source confirms it is the same man.
+const ATH_APART = ["ahmed-mohamed"];
+const athKey = (name, evId) => { const k = aslug(name); return ATH_APART.includes(k) && evId ? k + "-" + evId : k; };
+const DIV_ID = { "Men's Open": "open", "212": "212", "212 Bodybuilding": "212", "Classic Physique": "classic", "Men's Physique": "physique" };
+const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const whenT = (s) => { const m = String(s).match(/([A-Z][a-z]{2})[a-z]* (\d{1,2})[^,]*, (\d{4})/); return m && m[1] in MON ? +new Date(+m[3], MON[m[1]], +m[2]) : 0; };
+const GULF = ["Kuwait", "Saudi Arabia", "UAE", "Bahrain", "Oman", "Qatar"];
+let PROS_ = null;
+const PROS = () => {
+  if (PROS_) return PROS_;
+  const out = {};
+  const add = (name, country, r) => {
+    const id = athKey(name, r.evId); if (!id) return;
+    const a = out[id] || (out[id] = { id, name, country: "", handle: "", rows: [], auto: true });
+    if (country && !a.country) a.country = a.handle = country;
+    if (!a.rows.some((x) => x.ev === r.ev && x.div === r.div)) a.rows.push(r);
+  };
+  EVENTS.filter((e) => e.real && e.res && e.status === "finished").forEach((e) => { const url = e.resSrc || e.url;
+    Object.keys(e.res).forEach((d) => (e.res[d] || []).forEach(([n, c], i) => add(n, c, { evId: e.id, ev: e.name, loc: e.place, date: e.date, t: +e.start || 0, div: d, place: e.resKind === "procards" ? 0 : i + 1, url, src: srcName(url, e.src) }))); });
+  RESULTS.forEach((r) => { const ev = EVENTS.find((e) => e.name === r.ev); const [loc, date] = r.when.split(" · ");
+    r.wins.forEach(([d, w]) => { const [n, c] = w.split(" · "); add(n, c || "", { evId: ev ? ev.id : "", ev: r.ev, loc, date: date || "", t: whenT(r.when), div: DIV_ID[d] || d, place: 1, url: r.url, src: r.src }); }); });
+  Object.values(out).forEach((a) => { a.rows.sort((x, y) => y.t - x.t || (x.place || 99) - (y.place || 99)); a.best = Math.min(...a.rows.map((r) => r.place || 1.5)); /* a pro card (winning an amateur class) sorts between 1st and 2nd */ });
+  return (PROS_ = out);
+};
+const athOf = (id) => ATH[id] || PROS()[id];
+const athLink = (name, evId) => PROS()[athKey(name, evId)] ? "#athlete-" + athKey(name, evId) : "";
+const placeBadge = (p) => p ? `<div class="medal" style="color:${medalColor(p - 1)};border-color:${medalColor(p - 1)}">${p}</div>` : `<span class="chip gold" style="padding:8px;flex:none">${ic("check", 16)}</span>`;
+const athRow = (a) => `<a href="#athlete-${a.id}" class="rowcard">${placeBadge(a.best === 1.5 ? 0 : a.best)}<div style="flex:1;min-width:0"><b dir="auto">${esc(a.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">${a.country ? `<span>${esc(a.country)}</span> · ` : ""}<span>${DIV_NAMES[a.rows[0].div] || a.rows[0].div}</span></div></div>${ic("chev", 18)}</a>`;
+const athSort = (list) => { const mine = S.country === "sa" ? "Saudi Arabia" : "Kuwait"; const g = (a) => a.country === mine ? 0 : GULF.includes(a.country) ? 1 : 2;
+  return list.slice().sort((a, b) => g(a) - g(b) || a.best - b.best || b.rows.length - a.rows.length || a.name.localeCompare(b.name)); };
+
+SCREENS.athletes = () => { const f = S.athF || "all";
+  const list = athSort(Object.values(PROS()).filter((a) => f === "all" || (f === "gulf" ? GULF.includes(a.country) : a.country === f)));
+  return `
   <div class="scroll view-in">
-    <div class="top"><h1 class="title" tabindex="-1" data-focus>Athletes</h1></div>
-    <div class="sec"><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 240)).join("")}</div>
-    <p class="note">Photos and details are added with each athlete’s permission.</p></div>
-  </div>${tabbar("home")}`;
+    <div class="top"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 class="title" tabindex="-1" data-focus style="flex:1">Athletes</h1></div>
+    <div class="sec"><div class="sec-h"><h2>Featured athletes</h2></div><div class="grid2">${ATH_IDS.map((id) => athCard(ATH[id], 200)).join("")}</div>
+    <p class="note" style="padding:0">Photos and details are added with each athlete’s permission.</p></div>
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>Athletes with results</h2></div>
+      <div class="seg" style="padding:0" role="group" aria-label="Country">${[["all", "All"], ["Kuwait", "Kuwait"], ["Saudi Arabia", "Saudi Arabia"], ["gulf", "Gulf"]].map(([k, l]) => `<button aria-pressed="${f === k}" data-act="athF" data-v="${k}">${l}</button>`).join("")}</div>
+      ${list.length ? list.map(athRow).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">No athletes here yet.</div>`}
+      <p class="note" style="padding:0">Built only from published results, each with its source. More shows are added as they are checked.</p></div>
+  </div>${tabbar("home")}`; };
+
+// a result row in an event: tapping a real athlete opens his page
+const resLink = (e, n, inner) => { const h = e.real ? athLink(n, e.id) : ""; return h ? `<a href="${h}" class="rowcard">${inner}${ic("chev", 16)}</a>` : `<div class="rowcard">${inner}</div>`; };
+const proPage = (a) => {
+  const on = !!S.follow[a.id];
+  const n = (k) => a.rows.filter((r) => r.place === k).length;
+  const divs = [...new Set(a.rows.map((r) => r.div))];
+  const row = (r) => { const ev = r.evId && EVopen(r.evId);
+    return `<div class="rowcard" style="align-items:flex-start">${placeBadge(r.place)}<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+      ${ev ? `<a href="#event-${ev.id}" style="font-weight:700;line-height:1.3">${esc(r.ev)}</a>` : `<b style="line-height:1.3">${esc(r.ev)}</b>`}
+      <div class="muted" style="font-size:12px;line-height:1.5"><span>${DIV_NAMES[r.div] || esc(r.div)}</span> · <span>${esc(r.loc)}</span> · <span>${esc(r.date)}</span></div>
+      <div style="font-size:12px">${xl(r.url, r.src)}</div></div>
+      <b style="flex:none;color:${r.place ? medalColor(r.place - 1) : "var(--gold-2)"}">${r.place ? ordEn(r.place) : "Pro card"}</b></div>`; };
+  return `
+  <div class="scroll view-in" style="gap:22px;padding-bottom:20px">
+    <div class="cover" style="height:290px"><div class="ph" style="z-index:-2">${figure()}</div>
+      <div class="cover-top"><button class="ibtn glass" aria-label="Back" data-act="back">${ic("back")}</button></div>
+      <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;flex-direction:column;gap:8px">
+        <div class="row g8" style="flex-wrap:wrap">${a.country ? `<span class="chip">${esc(a.country)}</span>` : ""}${divs.map((d) => `<span class="chip gold">${DIV_NAMES[d] || esc(d)}</span>`).join("")}</div>
+        <h1 class="disp" dir="auto" tabindex="-1" data-focus style="font-weight:800;font-size:40px;line-height:1.05;text-transform:uppercase">${esc(a.name)}</h1></div></div>
+    <div class="sec" style="gap:18px">
+      <div class="two" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${[[n(1), "Wins", 0], [n(2), "2nd place", 1], [n(3), "3rd place", 2]].map(([v, l, i]) => `<div class="fact" style="align-items:center;text-align:center"><span style="color:${medalColor(i)}">${ic("trophy", 24)}</span><b class="disp" style="font-size:26px;color:${medalColor(i)}">${v}</b><span>${l}</span></div>`).join("")}</div>
+      <div class="sec-h"><h2>Results</h2><span class="chip">${a.rows.length}</span></div>
+      ${a.rows.map(row).join("")}
+      <p class="note" style="padding:0">Only results from published sources, each with its link. More shows are added as they are checked.</p>
+    </div>
+  </div>
+  <div class="cta"><button class="btn ${on ? "line" : "gold"}" style="flex:1" aria-pressed="${on}" data-act="follow" data-v="${a.id}">${on ? "Following" : "Follow"}</button><a href="#athletes" class="btn line">${ic("user", 18)} All athletes</a></div>`;
+};
 
 SCREENS.athlete = (id) => {
+  if (!ATH[id] && PROS()[id]) return proPage(PROS()[id]);
   const a = ATH[id]; if (!a) return notFound();
   const on = !!S.follow[a.id];
   const dash = "—";
@@ -976,7 +1046,7 @@ SCREENS.shop = () => soonScreen("shop");
 
 SCREENS.profile = () => {
   const last = S.regs[S.regs.length - 1];
-  const following = ATH_IDS.filter((id) => S.follow[id]);
+  const following = [...ATH_IDS, ...Object.keys(PROS())].filter((id) => S.follow[id] && athOf(id));
   return `
   <div class="scroll view-in">
     <div class="top"><h1 class="title" tabindex="-1" data-focus>Profile</h1></div>
@@ -1005,7 +1075,7 @@ SCREENS.profile = () => {
     </div>
 
     <div class="sec"><div class="sec-h"><h2>Following</h2></div>
-      ${following.length ? `<div class="grid2">${following.map((id) => athCard(ATH[id], 180)).join("")}</div>` : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">Follow athletes to get their results first.</div>`}</div>
+      ${following.length ? `<div class="grid2">${following.map((id) => athCard(athOf(id), 180)).join("")}</div>` : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">Follow athletes to get their results first.</div>`}</div>
 
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>My events</h2></div>${shownEvents().filter((e) => S.remind[e.id]).length ? shownEvents().filter((e) => S.remind[e.id]).sort((a, b) => a.start - b.start).map((x) => `<a href="#event-${x.id}" class="slim"><img src="${IMG[x.img]}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none"><div style="flex:1;min-width:0"><b style="display:block;font-size:15px">${esc(x.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(x.place)}</span> · <span>${esc(x.date)}</span></div></div>${ic("chev", 18)}</a>`).join("") : `<div class="card" style="padding:18px;color:#C9C9D1;line-height:1.5">Tap the bookmark on an event to save it here.</div>`}</div>
 
@@ -1344,13 +1414,13 @@ GOUT.search = () => {
   const q = S.s.q.trim().toLowerCase();
   if (!q) return `<div class="muted" style="margin-bottom:10px">Try one of these:</div><div class="seg" style="padding:0;flex-wrap:wrap;overflow:visible">${["Kuwait", "Olympia", "Riyadh", "Protein", "Calories"].map((s) => `<button data-act="searchSet" data-v="${s}" aria-pressed="false">${s}</button>`).join("")}</div>`;
   const has = (...t) => t.map((x) => x + " " + T(String(x))).join(" ").toLowerCase().includes(q);
-  const resHits = []; shownEvents().filter((e) => e.res).forEach((e) => Object.entries(e.res).forEach(([d, rows]) => rows.forEach(([n], i) => { if (has(n)) resHits.push(["#event-" + e.id, n, (e.resKind === "procards" ? "Pro card" : ordEn(i + 1)) + " · " + (DIV_NAMES[d] || d) + " · " + e.name, e.img]); })));
-  RESULTS.forEach((r) => r.wins.forEach(([d, w]) => { if (has(w.split(" · ")[0])) resHits.push([r.url, w.split(" · ")[0], "1st · " + d + " · " + r.ev, null]); }));
+  const resHits = []; shownEvents().filter((e) => e.res).forEach((e) => Object.entries(e.res).forEach(([d, rows]) => rows.forEach(([n], i) => { if (has(n)) resHits.push([(e.real && athLink(n, e.id)) || "#event-" + e.id, n, (e.resKind === "procards" ? "Pro card" : ordEn(i + 1)) + " · " + (DIV_NAMES[d] || d) + " · " + e.name, e.img]); })));
+  RESULTS.forEach((r) => r.wins.forEach(([d, w]) => { if (has(w.split(" · ")[0]) && !resHits.some((x) => x[1] === w.split(" · ")[0] && x[2].includes(r.ev))) resHits.push([athLink(w.split(" · ")[0], (EVENTS.find((e) => e.name === r.ev) || {}).id) || r.url, w.split(" · ")[0], "1st · " + d + " · " + r.ev, null]); }));
   const newsHits = [...AUTO.res, ...AUTO.drama, ...NEWS].filter((n, i, a) => a.findIndex((x) => x.url === n.url) === i && has(n.t, n.ar || "")).map((n) => [n.url, S.lang === "ar" && n.ar ? n.ar : n.t, (n.src || FV) + " · " + n.date, null]);
   const groups = [
     ["Events", shownEvents().filter((e) => has(e.name, e.place)).map((e) => ["#event-" + e.id, e.name, e.place + " · " + e.date, e.img])],
     ["Results", resHits],
-    ["Athletes", ATH_IDS.map((id) => ATH[id]).filter((a) => has(a.name, a.handle, a.country || "")).map((a) => ["#athlete-" + a.id, a.name, a.handle, a.photo])],
+    ["Athletes", [...ATH_IDS.map((id) => ATH[id]), ...athSort(Object.values(PROS()))].filter((a) => has(a.name, a.handle, a.country || "")).map((a) => ["#athlete-" + a.id, a.name, a.handle || (DIV_NAMES[a.rows[0].div] || ""), a.photo])],
     ["News", newsHits],
     ["Tools", TOOLS.filter((t) => has(t.name, t.s || t.sub || "")).map((t) => ["#" + t.id, t.name, t.s || t.sub || "", t.img])]
   ].filter((g) => g[1].length);
@@ -1633,6 +1703,7 @@ const ACT = {
   orgF: (v) => { S.orgF = v; },
   orgSet: (v) => { const [k, st] = v.split(":"); if (k[0] === "s") S.org[k] = st; else if (S.regs[+k.slice(1)]) S.regs[+k.slice(1)].status = st; persist(); toast(st === "approved" ? "Entry approved" : st === "rejected" ? "Entry rejected" : "Back to pending"); },
   searchSet: (v) => { S.s.q = v; },
+  athF: (v) => { S.athF = v; render(true); },
   follow: (v) => { S.follow[v] = !S.follow[v]; persist(); toast(S.follow[v] ? "You are following this athlete" : "Unfollowed"); },
   alert: (v) => { S.alerts[v] = !S.alerts[v]; },
   plan: (v) => { const [id, p] = v.split(":"); if (S.subs[id]) S.subs[id] = p; else S.plan[id] = p; persist(); },
@@ -2787,6 +2858,12 @@ Object.assign(AR, {
   "This deletes your account, predictions, saved events and all data on this phone. It can't be undone.": "هذا يحذف حسابك وتوقعاتك والبطولات المحفوظة وكل بياناتك على هذا الجوال، وما ينرد.",
   "Agree to the terms and privacy policy to continue.": "وافق على الشروط وسياسة الخصوصية عشان تكمل.",
   "Predictions are completely free: no entry fee, no betting and no cash prizes.": "التوقعات مجانية بالكامل: بدون رسوم دخول، ولا رهان، ولا جوائز مالية."
+});
+Object.assign(AR, {
+  "Athletes with results": "لاعبين عندهم نتايج", "Gulf": "الخليج", "No athletes here yet.": "ما في لاعبين هني للحين.", "All athletes": "كل اللاعبين",
+  "Built only from published results, each with its source. More shows are added as they are checked.": "مبنية بس من نتايج منشورة، وكل نتيجة عليها مصدرها. ونضيف بطولات زيادة أول ما نتأكد منها.",
+  "Only results from published sources, each with its link. More shows are added as they are checked.": "بس نتايج من مصادر منشورة، وكل وحدة عليها رابطها. ونضيف بطولات زيادة أول ما نتأكد منها.",
+  "11th": "الحادي عشر", "12th": "الثاني عشر", "13th": "الثالث عشر", "14th": "الرابع عشر", "15th": "الخامس عشر", "16th": "السادس عشر"
 });
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
