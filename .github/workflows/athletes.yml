@@ -1,0 +1,44 @@
+# Keeps the athlete records behind the BB365 rankings current.
+# Once a week the athletes robot reads the Fitness Volt pro database (men only) and saves athletes.json.
+# The hourly "Publish BB365" run then puts it on the site.
+# Run it by hand any time: GitHub → Actions → "Update athletes" → Run workflow.
+name: Update athletes
+
+on:
+  schedule:
+    - cron: "23 2 * * 5"   # Fridays 02:23 UTC (05:23 Kuwait and Riyadh)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: athletes
+  cancel-in-progress: false
+
+jobs:
+  athletes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Read the athlete records
+        run: python scripts/fetch_athletes.py
+
+      - name: Save athletes.json if it changed
+        run: |
+          if git diff --quiet -- athletes.json; then
+            echo "No change."
+          else
+            git config user.name "bb365-athletes-robot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add athletes.json
+            git commit -m "Update athletes [skip ci]"
+            git pull --rebase origin main || git rebase --abort
+            git push || echo "Could not save the update this week."
+          fi

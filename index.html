@@ -909,12 +909,17 @@ const PROS = () => {
   // full professional records (athletes.json): they replace the few rows above for the same athlete
   if (FVA) FVA.athletes.forEach((x) => {
     if (!x || typeof x.name !== "string" || !Array.isArray(x.rows) || !/^[a-z0-9-]+$/.test(x.id || "")) return;
-    const k = athKey(x.name, ""); const id = out[k] && !out[k].fv && !ATH_APART.includes(k) ? k : out[x.id] ? null : x.id; if (!id) return;
+    const rows = x.rows.filter((r) => Array.isArray(r) && r.length >= 5).map(([y, c, slug, d, pl], i) => { const ev = String(c).replace(/^\d{4}\s+/, ""); const app = EVENTS.find((e) => e.name === ev + " " + y);
+      return { evId: app ? app.id : "", ev, loc: "", date: String(+y || ""), t: +new Date(+y || 2000, 0, 1) + (999 - i), div: FV_DIV[d] || String(d), place: Number.isInteger(pl) && pl > 0 ? pl : null, url: /^[a-z0-9-]+$/.test(slug || "") ? FV_CON + slug + "/" : FV_ATH + x.id + "/", src: FV }; });
+    // which page: the app's page for the same name (for names kept apart, the one from the same show), else a new one
+    const k = athKey(x.name, ""); const cands = ATH_APART.includes(k) ? rows.filter((r) => r.evId).map((r) => k + "-" + r.evId) : [k];
+    const id = cands.find((c) => out[c] && !out[c].fv) || (out[x.id] ? null : x.id); if (!id) return;
     const a = out[id] || (out[id] = { id, name: x.name, country: "", handle: "", rows: [], auto: true });
     if (typeof x.country === "string" && x.country) a.country = a.handle = x.country;
     a.fv = FV_ATH + x.id + "/"; a.div = typeof x.div === "string" ? x.div : "";
-    a.rows = x.rows.filter((r) => Array.isArray(r) && r.length >= 5).map(([y, c, slug, d, pl], i) => { const ev = String(c).replace(/^\d{4}\s+/, ""); const app = EVENTS.find((e) => e.name === ev + " " + y);
-      return { evId: app ? app.id : "", ev, loc: "", date: String(+y || ""), t: +new Date(+y || 2000, 0, 1) + (999 - i), div: FV_DIV[d] || String(d), place: Number.isInteger(pl) && pl > 0 ? pl : null, url: /^[a-z0-9-]+$/.test(slug || "") ? FV_CON + slug + "/" : a.fv, src: FV }; });
+    // keep the app's own rows the database does not have (amateur pro cards, very recent shows)
+    const same = (f, r) => (f.evId && f.evId === r.evId) || f.ev === r.ev || f.ev + " " + f.date === r.ev;
+    a.rows = rows.concat(a.rows.filter((r) => !rows.some((f) => same(f, r))));
   });
   Object.values(out).forEach((a) => { a.rows.sort((x, y) => y.t - x.t || (x.place || 99) - (y.place || 99)); a.best = Math.min(...a.rows.map((r) => r.place === null ? 99 : r.place || 1.5)); /* a pro card (winning an amateur class) sorts between 1st and 2nd */ });
   return (PROS_ = out);
@@ -2888,7 +2893,7 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
   if (!/^https?:$/.test(location.protocol)) return;
   try {
     const [r, ra] = await Promise.all([fetch("athletes.json", { cache: "no-cache" }), fetch("athletes_ar.json", { cache: "no-cache" }).catch(() => null)]);
-    if (ra && ra.ok) { const j = await ra.json(); ["names", "contests", "divisions"].forEach((k) => { if (j && j[k] && typeof j[k] === "object") Object.entries(j[k]).forEach(([en, ar]) => { if (typeof en === "string" && typeof ar === "string" && ar && !AR[en]) AR[en] = ar; }); });
+    if (ra && ra.ok) { const j = await ra.json(); ["names", "contests", "countries", "divisions"].forEach((k) => { if (j && j[k] && typeof j[k] === "object") Object.entries(j[k]).forEach(([en, ar]) => { if (typeof en === "string" && typeof ar === "string" && ar && !AR[en]) AR[en] = ar; }); });
       if (j && j.words && typeof j.words === "object") Object.assign(FV_WORDS, j.words); }
     if (!r.ok) return; const j = await r.json(); if (!j || !Array.isArray(j.athletes)) return;
     // contest names: translated word by word when every word is known (numbers stay as they are)
@@ -2900,6 +2905,7 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
 })();
 const FV_WORDS = {}; // words inside contest names, from athletes_ar.json
 AR_RX.push([/^(\d+)(?:st|nd|rd|th)$/, (m, n) => `المركز ${n}`]);
+AR_RX.push([/^Masters (\d+)\+$/, (m, n) => `ماسترز فوق ${n}`]);
 Object.assign(AR, {
   "Real picks open when the start list is published. Until then, practise on Mr. Olympia 2026: pick the top 3, then see the real results.": "التوقعات الحقيقية تفتح أول ما تنتشر قائمة المشاركين. لين ذاك الوقت، تدرّب على مستر أولمبيا 2026: اختار أول 3، وبعدها شوف النتائج الحقيقية.",
   "Olympia 2026 top 5": "أول 5 في أولمبيا 2026", "Olympia 2026": "أولمبيا 2026", "Most possible": "أعلى نقاط ممكنة", "Real results": "النتائج الحقيقية",

@@ -31,6 +31,8 @@ BB365 is a men's bodybuilding app for Kuwait and Saudi Arabia, in the spirit of 
   - `events.json` from `scripts/fetch_events.py`, which reads the official IFBB Pro schedule (hourly)
   - `events_manual.json` hand-checked events not on that schedule yet (updated by a weekly scheduled Claude check, Saturdays 09:34 Riyadh)
   - `streams.json` live-stream links by event id (YouTube plays inside the app; Instagram/TikTok open a button)
+  - `athletes.json` full pro records (men only) from the Fitness Volt database, by `scripts/fetch_athletes.py` (weekly, `.github/workflows/athletes.yml`): the world's top athletes by wins, every Gulf athlete, and every athlete named in the app's own results. The Rankings screen (Kuwait, Saudi Arabia, Gulf, World level) ranks by first places, then second, then third, with no extra weight for any show (owner's rule).
+  - `athletes_ar.json` Arabic athlete names, countries, divisions and the words inside contest names. New names the robot brings in need adding here.
 - `.github/workflows/publish.yml` runs the robots and publishes to GitHub Pages on every push to `main` and every hour.
 
 ## Publishing

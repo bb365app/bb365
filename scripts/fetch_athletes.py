@@ -6,6 +6,7 @@ athlete's full professional record, from his first contest on, one row per conte
 Athletes read:
   - the world's top athletes by number of wins (WORLD_PAGES x 100, most wins first)
   - every male athlete from Kuwait, Saudi Arabia, the UAE, Bahrain, Oman and Qatar
+  - every athlete named in the app's own results (src/template.html), found by name search
 The app builds its rankings (Kuwait, Saudi Arabia, Gulf, World) from this file.
 
 Polite by design: one request at a time with a pause between them.
@@ -17,6 +18,7 @@ import json
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -71,6 +73,28 @@ def list_slugs(country=None, pages=50):
     return out
 
 
+def app_names():
+    """Names in the app's own result lists (REAL_EVENTS placings and RESULTS winners)."""
+    try:
+        s = (ROOT / "src" / "template.html").read_text(encoding="utf-8")
+        a, b = s.index("const REAL_EVENTS"), s.index("EVENTS.push(...REAL_EVENTS")
+        names = set(re.findall(r'\["([A-Z][^"]+?)", "[^"]*"\]', s[a:b]))
+        a, b = s.index("const RESULTS = ["), s.index("const CHAMPS")
+        names |= {n.split(" · ")[0] for n in re.findall(r'\["[^"]+", "([^"]+)"\]', s[a:b])}
+        return sorted(names)
+    except ValueError:
+        return []
+
+
+def find_slug(name):
+    """The database slug for an exact (case-insensitive) name match, or None."""
+    page = get(f"{BASE}?gender=M&per_page=25&q=" + urllib.parse.quote(name))
+    for slug, label in re.findall(r'href="https://fitnessvolt\.com/bodybuilding/athletes/([a-z0-9-]+)/"[^>]*>(.*?)</a>', page, flags=re.S):
+        if clean(label).lower() == name.lower():
+            return slug
+    return None
+
+
 def glance(text, label):
     m = re.search(rf"\n{label}\n([^\n]+)\n", text)
     return m.group(1).strip() if m else ""
@@ -101,7 +125,9 @@ def athlete(slug):
         rows.append([int(clean(year.group(1)) or 0), clean(contest.group(1)), link.group(1) if link else "", division, int(p.group(1)) if p else None])
     if not rows:
         return None
-    return {"id": slug, "name": name, "country": COUNTRY_NAMES.get(country, country), "div": glance(lines, "Division"), "rows": rows}
+    divs = [r[3] for r in rows]
+    main_div = max(set(divs), key=divs.count)  # the division he entered most
+    return {"id": slug, "name": name, "country": COUNTRY_NAMES.get(country, country), "div": main_div, "rows": rows}
 
 
 def main():
@@ -111,6 +137,11 @@ def main():
         got = list_slugs(country=code)
         print(code, len(got))
         slugs += [s for s in got if s not in slugs]
+    for name in app_names():
+        slug = find_slug(name)
+        if slug and slug not in slugs:
+            slugs.append(slug)
+    print("with the app's own athletes:", len(slugs))
     athletes = []
     for i, slug in enumerate(slugs, 1):
         a = athlete(slug)
