@@ -158,6 +158,12 @@ img{display:block}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow-y:auto;background:var(--s1);border-radius:26px 26px 0 0;border-top:1px solid var(--line);z-index:21;padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .25s ease-out}
 @keyframes fade{from{opacity:0}}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
+.agree{display:flex;align-items:center;gap:12px;color:#D8D8DE;font-size:14px;line-height:1.5}
+.agree .box{width:28px;height:28px;flex:none;border-radius:7px;border:1.5px solid var(--gold);background:none;display:grid;place-items:center;color:#111;padding:0;cursor:pointer}
+.agree .box[aria-checked="true"]{background:var(--gold)}
+.agree a{color:var(--gold-2);text-decoration:underline}
+.agree .box[aria-invalid="true"]{border-color:#FF6B6B}
+.ad-tag{display:inline-block;font-size:11px;font-weight:700;color:#111;background:var(--gold-2);border-radius:6px;padding:1px 7px;margin-inline-end:6px;vertical-align:middle}
 #toast.top{top:calc(env(safe-area-inset-top,0px) + 16px);bottom:auto}
 .next-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px;scrollbar-width:none;overscroll-behavior-x:contain}
 .next-row::-webkit-scrollbar{display:none}
@@ -767,7 +773,7 @@ const kwProCard = () => { const e = EV("kwpro26"); if (!e) return "";
   return `<a href="#event-kwpro26" class="res"><div class="res-h"><span class="res-ic">${ic("trophy", 22)}</span><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px"><span>${esc(e.place)}</span> · <span>${esc(e.date)}</span></div></div><span class="chip gold">Kuwait</span></div>
   ${[["Classic Physique", e.res.classic[0][0] + " · " + e.res.classic[0][1]], ["Men's Physique", e.res.physique[0][0] + " · " + e.res.physique[0][1]], ["Top Kuwaiti", e.res.classic[2][0] + " · 3rd"]].map(([d, w]) => `<div class="win"><span class="muted">${d}</span><b style="text-align:end">${esc(w)}</b></div>`).join("")}</a>`; };
 const autoCard = (icn) => (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="res" style="flex-direction:row;align-items:center;gap:12px"><span class="res-ic">${ic(icn, 22)}</span><div style="flex:1;min-width:0"><b dir="auto" data-keep style="display:block;font-size:15px;line-height:1.3">${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="muted" style="font-size:12px;margin-top:4px"><bdi data-keep>${esc(n.src)}</bdi> · <bdi>${esc(n.date)}</bdi></div></div>${ic("ext", 16, 2)}</a>`;
-const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><bdi data-keep>${esc(n.src || FV)}</bdi> · <bdi>${esc(n.date)}</bdi></div></div>${ic("ext", 16, 2)}</a>`;
+const newsRow = (n) => `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news"><span class="th">${ic(IC[n.ic] ? n.ic : "news", 24)}</span><div style="flex:1;min-width:0">${n.local ? '<span class="chip gold" style="margin-bottom:6px">Kuwait</span>' : ""}<b dir="auto" data-keep>${n.sponsored ? `<span class="ad-tag">${S.lang === "ar" ? "إعلان" : "Ad"}</span>` : ""}${esc(S.lang === "ar" && n.ar ? n.ar : n.t)}</b><div class="src"><bdi data-keep>${esc(n.src || FV)}</bdi> · <bdi>${esc(n.date)}</bdi></div></div>${ic("ext", 16, 2)}</a>`;
 
 SCREENS.home = () => {
   const e = homeEv(); const f = S.feed || "all"; const on = (k) => f === "all" || f === k;
@@ -979,6 +985,9 @@ SCREENS.profile = () => {
     <div class="sec"><div class="card row" style="gap:16px;padding:16px"><div class="avatar-lg" style="width:72px;height:72px">${last && last.photo ? `<img src="${last.photo}" alt="">` : ic("user", 32)}</div><div style="min-width:0"><div style="font-size:18px;font-weight:700" dir="auto">${last ? esc(last.name) : S.user ? esc(S.user.name) : "Guest athlete"}</div><div class="muted" style="font-size:13px">${last ? esc(last.club) + " · " + (S.country === "sa" ? "Saudi Arabia" : "Kuwait") : S.user ? "BB365 member" : "Register for an event to build your athlete profile"}</div></div></div></div>
     <div class="sec" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${[[S.regs.length, "Entries"], [following.length, "Following"], [pdDone(), "Predictions"]].map(([n, l]) => `<div class="fact" style="align-items:center"><b class="disp" style="font-size:30px;line-height:1">${n}</b><span>${l}</span></div>`).join("")}</div>
 
+    <div class="sec" style="gap:10px"><div class="sec-h"><h2>About BB365</h2></div>${[["#about", "info", "About & contact"], ["#privacy", "shield", "Privacy policy"], ["#terms", "news", "Terms of use"]].map(([h, i, l]) => `<a href="${h}" class="slim"><span class="chip gold" style="padding:8px;flex:none">${ic(IC[i] ? i : "news", 18)}</span><b style="flex:1;font-size:15px">${l}</b>${ic("chev", 18)}</a>`).join("")}
+      ${S.user || S.acct ? `<button class="btn line block" style="color:#FF8A8A;border-color:rgba(255,107,107,.45)" data-act="${S.delAsk ? "delAccount" : "delAsk"}">${S.delAsk ? "Tap again to delete everything" : "Delete my account"}</button>${S.delAsk ? `<p class="muted" style="font-size:12px;margin:0;line-height:1.5">This deletes your account, predictions, saved events and all data on this phone. It can't be undone. <button class="link" style="background:none;border:0;color:var(--gold-2);font:inherit;padding:0;text-decoration:underline" data-act="delAsk">Cancel</button></p>` : ""}` : ""}</div>
+
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>Country</h2></div><div class="seg" style="padding:0" role="radiogroup" aria-label="Country">${["kw", "sa"].map((k) => `<button role="radio" aria-checked="${S.country === k}" aria-pressed="${S.country === k}" data-act="country" data-v="${k}">${tx(CN[k].en, CN[k].ar)}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">Set automatically from your location. Prices, events and clubs follow it.</p></div>
 
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>My predictions</h2></div><a href="#predict" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("trophy", 20)}</span><div style="flex:1;min-width:0"><b>Practice round</b><div class="muted" style="font-size:12px;margin-top:2px">${pdMine()} pts · Olympia 2026</div></div>${ic("chev", 18)}</a></div>
@@ -1007,6 +1016,45 @@ SCREENS.profile = () => {
       ${[["start", "Event start reminders", "When a show begins"], ["results", "Results published", "Final placings per category"]].map(([k, t, h]) => `<div class="rowcard" style="justify-content:space-between"><div><b>${t}</b><div class="muted" style="font-size:12px;margin-top:2px">${h}</div></div><button role="switch" aria-checked="${S.alerts[k]}" aria-label="${t}" data-act="alert" data-v="${k}" style="flex:none;width:52px;height:32px;border-radius:16px;border:0;padding:3px;display:flex;align-items:center;justify-content:${S.alerts[k] ? "flex-end" : "flex-start"};background:${S.alerts[k] ? "var(--gold)" : "#5A5A63"}"><i style="width:26px;height:26px;border-radius:13px;background:#F4F3EF"></i></button></div>`).join("")}</div>
   </div>${tabbar("profile")}`;
 };
+
+
+/* ============ Legal pages (Nov 26, 2026). Written in both languages; the text is chosen by S.lang, not the AR dictionary ============ */
+const BB_CONTACT = { email: "", licence: "" }; // fill in when the official email and the commercial registration number exist
+const LEGAL_UPDATED = { en: "Last updated: 26 November 2026", ar: "آخر تحديث: 26 نوفمبر 2026" };
+const legalPage = (title, blocks) => { const L = S.lang === "ar" ? "ar" : "en";
+  const dir = L === "ar" ? "rtl" : "ltr";
+  return `<div class="scroll view-in" dir="${dir}" style="text-align:start"><div class="top"><button class="ibtn" aria-label="${L === "ar" ? "رجوع" : "Back"}" data-act="back" data-keep>${ic("back")}</button></div>
+  <div class="sec" style="gap:6px"><h1 class="title" tabindex="-1" data-focus data-keep>${title[L]}</h1><p class="muted" style="margin:0;font-size:13px" data-keep>${LEGAL_UPDATED[L]}</p></div>
+  ${blocks.map((b) => `<div class="sec" style="gap:8px" data-keep dir="${dir}"><h2 style="font-size:18px;margin:0">${b.h[L]}</h2>${b.p[L].map((x) => `<p style="margin:0;line-height:1.7;color:#D8D8DE;font-size:15px">${x}</p>`).join("")}</div>`).join("")}
+  <div class="sec"><p class="note" style="padding:0" data-keep>${L === "ar" ? "هذه الصفحة للتوضيح ولا تُعد استشارة قانونية." : "This page explains how BB365 works. It is not legal advice."}</p></div></div>`; };
+const contactLine = (L) => BB_CONTACT.email ? (L === "ar" ? `راسلنا على <bdi>${esc(BB_CONTACT.email)}</bdi>.` : `Email us at ${esc(BB_CONTACT.email)}.`) : (L === "ar" ? "إيميل التواصل الرسمي يُضاف هنا قريبًا." : "Our official contact email will be added here soon.");
+SCREENS.about = () => { const L = S.lang === "ar" ? "ar" : "en";
+  return legalPage({ en: "About & contact", ar: "من نحن وتواصل معنا" }, [
+    { h: { en: "What BB365 is", ar: "شنو BB365" }, p: { en: ["BB365 is an Arabic-first app for men's bodybuilding in Kuwait and Saudi Arabia: events, results, news headlines, predictions and training tools."], ar: ["BB365 تطبيق عربي لكمال الأجسام للرجال في الكويت والسعودية: البطولات، والنتائج، وعناوين الأخبار، والتوقعات، وأدوات التمرين."] } },
+    { h: { en: "Independent", ar: "تطبيق مستقل" }, p: { en: ["BB365 is independent. It is not run by, endorsed by or linked to the IFBB Pro League, the Olympia or any federation. Event names belong to their owners."], ar: ["BB365 تطبيق مستقل، وما يتبع ولا يمثل IFBB Pro League ولا أولمبيا ولا أي اتحاد. أسماء البطولات ملك أصحابها."] } },
+    { h: { en: "Sources", ar: "المصادر" }, p: { en: ["Results and events come from official schedules and trusted sites such as the IFBB Pro League, Fitness Volt and Generation Iron. Every item links to its source. News shows the headline only and opens the original article on its own site."], ar: ["النتائج والبطولات من الجداول الرسمية ومواقع موثوقة مثل IFBB Pro League وFitness Volt وGeneration Iron، وكل خبر عليه رابط مصدره. الأخبار نعرض عنوانها بس، ويفتح المقال الأصلي في موقعه."] } },
+    { h: { en: "Contact", ar: "تواصل معنا" }, p: { en: [contactLine("en"), "To report a wrong result or date, contact us with the source and we will correct it."], ar: [contactLine("ar"), "إذا لقيت نتيجة أو تاريخ غلط، راسلنا مع المصدر ونصلحه."] } },
+    { h: { en: "Business details", ar: "بيانات النشاط" }, p: { en: [BB_CONTACT.licence ? `Commercial registration: ${esc(BB_CONTACT.licence)}` : "BB365 is free and takes no payments. The commercial registration number will be shown here before any paid service starts."], ar: [BB_CONTACT.licence ? `رقم السجل التجاري: <bdi>${esc(BB_CONTACT.licence)}</bdi>` : "BB365 مجاني وما ياخذ أي مدفوعات. رقم السجل التجاري ينعرض هني قبل ما تبدأ أي خدمة مدفوعة."] } },
+  ]); };
+SCREENS.privacy = () => legalPage({ en: "Privacy policy", ar: "سياسة الخصوصية" }, [
+  { h: { en: "In short", ar: "باختصار" }, p: { en: ["BB365 keeps your data on your own phone. We do not have a server that stores your account, we do not sell data and we do not share it."], ar: ["BB365 يحفظ بياناتك على جوالك أنت. ما عندنا سيرفر يحفظ حسابك، وما نبيع بياناتك ولا نشاركها مع أحد."] } },
+  { h: { en: "What is saved, and where", ar: "شنو ينحفظ ووين" }, p: { en: ["When you create an account: your name, mobile number and email (optional). They are saved in this browser on this phone only.", "Your password is never saved. It is only checked for length.", "Your predictions, saved events, alerts, workouts and tool entries are saved on this phone only.", "Photos you add to an event entry stay on this phone."], ar: ["لما تسوي حساب: اسمك، ورقم جوالك، والإيميل (اختياري). ينحفظون في المتصفح على هذا الجوال بس.", "كلمة المرور ما تنحفظ أبدًا، نتأكد بس من طولها.", "توقعاتك، والبطولات المحفوظة، والتنبيهات، وتمارينك، وبيانات الأدوات تنحفظ على هذا الجوال بس.", "الصور اللي تضيفها في تسجيل البطولة تبقى على هذا الجوال."] } },
+  { h: { en: "Why", ar: "ليش" }, p: { en: ["Only to run the features you use: show your name, keep your predictions and remind you about events."], ar: ["بس عشان تشتغل المزايا اللي تستخدمها: يطلع اسمك، وتنحفظ توقعاتك، ونذكرك بالبطولات."] } },
+  { h: { en: "Other services the app uses", ar: "خدمات ثانية يستخدمها التطبيق" }, p: { en: ["The app is hosted on GitHub Pages and loads fonts from Google Fonts. Like any website, these services receive your device's IP address when the page loads.", "News and source links open other websites, which have their own privacy policies."], ar: ["التطبيق مستضاف على GitHub Pages ويحمّل الخطوط من Google Fonts. مثل أي موقع، هالخدمات توصلها عنوان الـ IP لجهازك لما تفتح الصفحة.", "روابط الأخبار والمصادر تفتح مواقع ثانية، ولكل موقع سياسة خصوصية خاصة فيه."] } },
+  { h: { en: "Your control", ar: "التحكم بيدك" }, p: { en: ["You can see your details in Profile and delete your account and all saved data at any time with “Delete my account”. Clearing this site's data in your browser also deletes it."], ar: ["تقدر تشوف بياناتك في حسابي، وتحذف حسابك وكل بياناتك المحفوظة بأي وقت من زر «احذف حسابي». ومسح بيانات الموقع من المتصفح يحذفها بعد."] } },
+  { h: { en: "Age", ar: "العمر" }, p: { en: ["BB365 is meant for adults (18 and over)."], ar: ["BB365 مخصص للكبار (18 سنة وفوق)."] } },
+  { h: { en: "Changes and contact", ar: "التحديثات والتواصل" }, p: { en: ["If accounts move to a server in the future, this policy will be updated first and you will be asked to agree again. " + contactLine("en")], ar: ["إذا انتقلت الحسابات لسيرفر بالمستقبل، بنحدّث هالسياسة أول ونطلب موافقتك من جديد. " + contactLine("ar")] } },
+]);
+SCREENS.terms = () => legalPage({ en: "Terms of use", ar: "الشروط والأحكام" }, [
+  { h: { en: "Using BB365", ar: "استخدام BB365" }, p: { en: ["BB365 is free. By using it you agree to these terms. If you do not agree, please do not use the app."], ar: ["BB365 مجاني. استخدامك للتطبيق يعني إنك موافق على هالشروط، وإذا مو موافق لا تستخدمه."] } },
+  { h: { en: "Information can change", ar: "المعلومات ممكن تتغير" }, p: { en: ["Dates, divisions and results come from official and trusted sources and can change. Always check the official event page before you travel, register or buy."], ar: ["التواريخ والفئات والنتائج من مصادر رسمية وموثوقة، وممكن تتغير. تأكد دايمًا من صفحة البطولة الرسمية قبل ما تسافر أو تسجل أو تشتري."] } },
+  { h: { en: "Predictions are free", ar: "التوقعات مجانية" }, p: { en: ["Predictions and challenges are a free game for fun. There is no entry fee, no betting and no cash prize."], ar: ["التوقعات والتحديات لعبة مجانية للمتعة. ما فيها رسوم دخول، ولا رهان، ولا جوائز مالية."] } },
+  { h: { en: "Not medical advice", ar: "مو استشارة طبية" }, p: { en: ["The coach and tools give general estimates. They are not medical, diet or training advice for your case. Talk to a doctor before a big change in diet or training, and never use banned or unsafe substances."], ar: ["المدرب والأدوات يعطونك تقديرات عامة، ومو استشارة طبية أو غذائية أو تدريبية لحالتك. كلّم طبيب قبل أي تغيير كبير في أكلك أو تمرينك، ولا تستخدم أي مواد ممنوعة أو خطرة."] } },
+  { h: { en: "Content and names", ar: "المحتوى والأسماء" }, p: { en: ["News headlines link to their publishers, who own the articles. BB365 is not linked to the IFBB Pro League or any federation. Athlete photos are only added with permission."], ar: ["عناوين الأخبار مربوطة بمواقعها، والمقالات ملك ناشريها. BB365 ما يتبع IFBB Pro League ولا أي اتحاد. صور اللاعبين ما تنضاف إلا بموافقتهم."] } },
+  { h: { en: "Ads and sponsors", ar: "الإعلانات والرعاية" }, p: { en: ["Any paid or sponsored content is always labelled “Ad”."], ar: ["أي محتوى مدفوع أو برعاية يكون مكتوب عليه دايمًا «إعلان»."] } },
+  { h: { en: "Your account", ar: "حسابك" }, p: { en: ["For now your account is saved on this phone only. Use a real name and your own number. You can delete it at any time from Profile."], ar: ["حاليًا حسابك ينحفظ على هذا الجوال بس. استخدم اسمك الحقيقي ورقمك أنت. وتقدر تحذفه بأي وقت من حسابي."] } },
+  { h: { en: "Law", ar: "القانون" }, p: { en: ["These terms follow the laws of the State of Kuwait. " + contactLine("en")], ar: ["هالشروط تخضع لقوانين دولة الكويت. " + contactLine("ar")] } },
+]);
 
 const notFound = () => `<div class="scroll"><div class="top"><a href="#home" class="ibtn" aria-label="Home">${ic("back")}</a></div><div class="sec"><h1 class="title" tabindex="-1" data-focus>Not found</h1><p class="muted">That page does not exist.</p></div></div>${tabbar("home")}`;
 
@@ -1980,6 +2028,7 @@ SCREENS.predict = () => {
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>How points work</h2></div><div class="card" style="padding:6px 16px">${[["Correct winner", 5], ["Correct 2nd place", 3], ["Correct 3rd place", 2], ["In the top 3, wrong place", 1]].map(([l, p]) => `<div class="sum"><span>${l}</span><b class="num">+${p}</b></div>`).join("")}</div></div>
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>Coming up</h2></div><a href="#event-${e.id}" class="rowcard"><span class="chip gold" style="padding:10px;flex:none">${ic("calendar", 20)}</span><div style="flex:1;min-width:0"><b>${esc(e.name)}</b><div class="muted" style="font-size:12px;margin-top:2px">Predictions open when the start list is published.</div></div>${ic("chev", 18)}</a></div>
     <p class="note" style="padding:0 20px">The practice round uses the real Mr. Olympia 2026 top 5 and results. Points with friends start when real accounts are ready.</p>
+    <p class="note" style="padding:0 20px">Predictions are completely free: no entry fee, no betting and no cash prizes.</p>
   </div>${tabbar("home")}`;
 };
 Object.assign(ACT, {
@@ -2586,6 +2635,7 @@ SCREENS.signup = () => {
           ${suIn("phone", "Mobile number", 'type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="' + (S.country === "sa" ? "5XXXXXXXX" : "XXXXXXXX") + '"')}
           ${m === "up" ? suIn("email", "Email (optional)", 'type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" dir="ltr"') : ""}
           ${suIn("pass", "Password", `type="${S.su.show ? "text" : "password"}" autocomplete="${m === "in" ? "current-password" : "new-password"}" placeholder="${m === "in" ? "Your password" : "At least 8 characters"}" dir="auto"`)}
+          ${m === "up" ? `<div class="field" style="gap:6px"><div class="agree"><button type="button" class="box" role="checkbox" aria-checked="${!!S.su.agree}" aria-labelledby="su-agree-l" data-act="suAgree"${S.su.err.agree ? ' aria-invalid="true" aria-describedby="su-e-agree"' : ""}>${S.su.agree ? ic("check", 16, 2.6) : ""}</button><span id="su-agree-l">I agree to the <a href="#terms">Terms of use</a> and the <a href="#privacy">Privacy policy</a></span></div>${S.su.err.agree ? `<div class="err" id="su-e-agree">${S.su.err.agree}</div>` : ""}</div>` : ""}
           <button class="btn gold block au-go" type="submit">${m === "in" ? "Sign in" : "Create account"}</button>
         </form>
       </div>
@@ -2606,6 +2656,7 @@ document.addEventListener("submit", (ev) => {
   if (!suPhoneOk(f.phone)) e.phone = S.country === "sa" ? "Enter a 9-digit Saudi mobile number that starts with 5." : "Enter an 8-digit Kuwaiti mobile number.";
   if (m === "up" && f.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = "Enter a valid email, or leave it empty.";
   if (f.pass.length < 8) e.pass = "Use at least 8 characters.";
+  if (m === "up" && !S.su.agree) e.agree = "Agree to the terms and privacy policy to continue.";
   if (m === "in" && !e.phone && (!S.acct || S.acct.phone !== f.phone)) e.phone = "No account with this number on this phone. Sign up first.";
   S.su.err = e;
   if (Object.keys(e).length) { render(true); const first = document.querySelector('[aria-invalid="true"]'); if (first) first.focus(); return; }
@@ -2616,6 +2667,10 @@ document.addEventListener("submit", (ev) => {
 });
 Object.assign(ACT, {
   suMode: (v) => { S.su.mode = v; S.su.err = {}; },
+  suAgree: () => { S.su.agree = !S.su.agree; if (S.su.agree) delete S.su.err.agree; },
+  back: () => { if (history.length > 1) history.back(); else location.hash = "#profile"; },
+  delAsk: () => { S.delAsk = !S.delAsk; },
+  delAccount: () => { try { localStorage.removeItem(KEY); } catch (e) {} location.hash = ""; location.reload(); },
   suEye: () => { S.su.show = !S.su.show; },
   suSkip: () => { S.suDone = true; persist(); afterSignup(); },
   suGo: (v) => { S.su.mode = v === "in" ? "in" : "up"; S.su.err = {}; location.hash = "#signup"; },
@@ -2725,6 +2780,13 @@ Object.assign(AR, {
   "Save an event with the bookmark and its reminder shows here.": "احفظ أي بطولة بعلامة الحفظ ويطلع لك تذكيرها هني.",
   "Top Saudi result": "أفضل نتيجة سعودية", "Romania Muscle Fest Pro 2026 · Nov 7–8, 2026": "رومانيا مسل فيست برو 2026 · 7–8 نوفمبر 2026", "Ahmed Juraybi · 1st": "أحمد الجريبي · الأول",
   "Results": "النتائج", "News": "الأخبار", "1st": "الأول", "2nd": "الثاني", "3rd": "الثالث", "4th": "الرابع", "5th": "الخامس", "6th": "السادس", "7th": "السابع", "8th": "الثامن", "9th": "التاسع", "10th": "العاشر", "Pro card": "كرت المحترفين", "Events, results, athletes, news": "بطولات، نتائج، لاعبين، أخبار"
+});
+Object.assign(AR, {
+  "About BB365": "عن BB365", "About & contact": "من نحن وتواصل معنا", "Privacy policy": "سياسة الخصوصية", "Terms of use": "الشروط والأحكام",
+  "Delete my account": "احذف حسابي", "Tap again to delete everything": "اضغط مرة ثانية عشان تحذف كل شي", "Cancel": "إلغاء",
+  "This deletes your account, predictions, saved events and all data on this phone. It can't be undone.": "هذا يحذف حسابك وتوقعاتك والبطولات المحفوظة وكل بياناتك على هذا الجوال، وما ينرد.",
+  "Agree to the terms and privacy policy to continue.": "وافق على الشروط وسياسة الخصوصية عشان تكمل.",
+  "Predictions are completely free: no entry fee, no betting and no cash prizes.": "التوقعات مجانية بالكامل: بدون رسوم دخول، ولا رهان، ولا جوائز مالية."
 });
 AR_RX.push([/^(\d) IFBB Pro League shows in (.+?) on the same dates: (.+)\.$/, (m, n, p, l) => `${n === "2" ? "بطولتين" : n + " بطولات"} من IFBB Pro League في ${T(p)} بنفس المواعيد: ${l.split(/, | and /).map((x) => T(x)).join("، ")}.`]);
 AR_RX.push([/^(.+) \(([^()]+)\)$/, (m, a, b) => (T(a) !== a || T(b) !== b ? `${T(a)} (${T(b)})` : m)]);
