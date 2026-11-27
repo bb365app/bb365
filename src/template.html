@@ -932,7 +932,7 @@ const rankScreen = () => {
   const t = RK_TABS.some(([k]) => k === S.rk) ? S.rk : S.country === "sa" ? "sa" : "kw";
   const list = rkList(t); const lead = list[0]; const tied = lead ? list.filter(([, n]) => n === 1).length - 1 : 0;
   return `
-  <div class="scroll view-in"><div class="toolhead"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 tabindex="-1" data-focus>Rankings</h1><span style="width:44px"></span></div>
+  <div class="scroll view-in"><div class="toolhead"><button class="ibtn" aria-label="Back" data-act="back">${ic("back")}</button><h1 tabindex="-1" data-focus>Rankings</h1><button class="ibtn" aria-label="Share" data-act="share" data-v="BB365 Rankings">${ic("share")}</button></div>
     <div class="seg" role="group" aria-label="Ranking">${RK_TABS.map(([k, l]) => `<button aria-pressed="${t === k}" data-act="rk" data-v="${k}">${l}</button>`).join("")}</div>
     ${lead ? `<div class="sec"><a href="#athlete-${lead[0].id}" class="pc" style="height:240px">${athPh()}<div class="pc-body"><span class="chip gold" style="align-self:flex-start">${ic("trophy", 14)} ${RK_NO1[t]}</span><div class="pc-title" dir="auto" style="font-size:34px">${esc(lead[0].name)}</div><div class="pc-sub"><span>Wins:</span> <b>${nPlace(lead[0], 1)}</b> · <span>2nd place</span> <b>${nPlace(lead[0], 2)}</b> · <span>3rd place</span> <b>${nPlace(lead[0], 3)}</b></div>${tied ? `<div class="pc-sub"><span>Tied at No. 1:</span> <span>${tied + 1}</span></div>` : ""}</div></a></div>` : ""}
     <div class="sec" style="gap:10px"><div class="sec-h"><h2>${(RK_TABS.find(([k]) => k === t) || [])[1]}</h2><span class="chip">${list.length}</span></div>
@@ -969,7 +969,7 @@ const proPage = (a) => {
       <p class="note" style="padding:0">Only results from published sources, each with its link. More shows are added as they are checked.</p>
     </div>
   </div>
-  <div class="cta"><button class="btn ${on ? "line" : "gold"}" style="flex:1" aria-pressed="${on}" data-act="follow" data-v="${a.id}">${on ? "Following" : "Follow"}</button><a href="#rankings" class="btn line">${ic("trophy", 18)} Rankings</a></div>`;
+  <div class="cta"><button class="btn ${on ? "line" : "gold"}" style="flex:1" aria-pressed="${on}" data-act="follow" data-v="${a.id}">${on ? "Following" : "Follow"}</button><button class="btn line" data-act="share" data-v="${esc(a.name)}">${ic("share", 18)} Share</button></div>`;
 };
 
 SCREENS.athlete = (id) => {
@@ -1119,7 +1119,7 @@ SCREENS.profile = () => {
       <div class="seg" role="group" aria-label="Language" style="padding:0"><button aria-pressed="${S.lang !== "ar"}" data-act="lang" data-v="en">English</button><button aria-pressed="${S.lang === "ar"}" data-act="lang" data-v="ar" style="font-family:'Noto Kufi Arabic',var(--body)">العربية</button></div></div>
 
     <div class="sec"><div class="sec-h"><h2>Alerts</h2></div>
-      ${[["start", "Event start reminders", "When a show begins"], ["results", "Results published", "Final placings per category"]].map(([k, t, h]) => `<div class="rowcard" style="justify-content:space-between"><div><b>${t}</b><div class="muted" style="font-size:12px;margin-top:2px">${h}</div></div><button role="switch" aria-checked="${S.alerts[k]}" aria-label="${t}" data-act="alert" data-v="${k}" style="flex:none;width:52px;height:32px;border-radius:16px;border:0;padding:3px;display:flex;align-items:center;justify-content:${S.alerts[k] ? "flex-end" : "flex-start"};background:${S.alerts[k] ? "var(--gold)" : "#5A5A63"}"><i style="width:26px;height:26px;border-radius:13px;background:#F4F3EF"></i></button></div>`).join("")}</div>
+      ${[["start", "Event start reminders", "When a show begins"], ["results", "Results published", "Final placings per category"]].map(([k, t, h]) => `<div class="rowcard" style="justify-content:space-between"><div><b>${t}</b><div class="muted" style="font-size:12px;margin-top:2px">${h}</div></div><button role="switch" aria-checked="${S.alerts[k]}" aria-label="${t}" data-act="alert" data-v="${k}" style="flex:none;width:52px;height:32px;border-radius:16px;border:0;padding:3px;display:flex;align-items:center;justify-content:${S.alerts[k] ? "flex-end" : "flex-start"};background:${S.alerts[k] ? "var(--gold)" : "#5A5A63"}"><i style="width:26px;height:26px;border-radius:13px;background:#F4F3EF"></i></button></div>`).join("")}<p class="note" style="padding:0">Reminders show inside the app, in Alerts. Phone notifications come later.</p></div>
   </div>${tabbar("profile")}`;
 };
 
@@ -1740,6 +1740,10 @@ const ACT = {
   orgSet: (v) => { const [k, st] = v.split(":"); if (k[0] === "s") S.org[k] = st; else if (S.regs[+k.slice(1)]) S.regs[+k.slice(1)].status = st; persist(); toast(st === "approved" ? "Entry approved" : st === "rejected" ? "Entry rejected" : "Back to pending"); },
   searchSet: (v) => { S.s.q = v; },
   rk: (v) => { S.rk = v; render(true); },
+  // share the current page: the phone's share sheet (WhatsApp, Instagram...), or copy the link where there is none
+  share: async (v) => { const url = location.href, title = S.lang === "ar" ? T(v || "BB365") : v || "BB365";
+    try { if (navigator.share) { await navigator.share({ title, text: title + " · BB365", url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch (e) { toast(url); } },
   follow: (v) => { S.follow[v] = !S.follow[v]; persist(); toast(S.follow[v] ? "You are following this athlete" : "Unfollowed"); },
   alert: (v) => { S.alerts[v] = !S.alerts[v]; },
   plan: (v) => { const [id, p] = v.split(":"); if (S.subs[id]) S.subs[id] = p; else S.plan[id] = p; persist(); },
@@ -1814,10 +1818,11 @@ const view = document.getElementById("view");
 function route() {
   let h = location.hash.replace(/^#\/?/, ""); try { h = decodeURIComponent(h); } catch (e) {}
   const m = h.match(/^([a-z]+)(?:-([a-z0-9-]+))?$/);
-  if (!m) return ["splash"];
+  const away = S.suDone && S.langSet ? ["home"] : ["splash"]; // a broken or old link must never leave a set-up user on the frozen logo
+  if (!m) return h ? away : ["splash"]; // an empty address still opens with the animated logo
   const [, n, a] = m;
   if (n === "register" || n === "event" || n === "athlete" || n === "tickets" || n === "ticket" || n === "group") return [n, a];
-  return SCREENS[n] ? [n] : ["splash"];
+  return SCREENS[n] && !(n === "splash" && away[0] === "home") ? [n] : away;
 }
 let lastRoute = "";
 function render(keepScroll) {
@@ -1827,6 +1832,7 @@ function render(keepScroll) {
   const changed = key !== lastRoute;
   if (changed && lastRoute === "alerts-") markSeen();
   if (changed) { S.sheet = null; if (name === "event") { const ev = EV(arg); S.evTab = ev && ev.status === "finished" ? "results" : "overview"; if (ev && ev.res && !ev.res[S.evCat]) S.evCat = (ev.divs || Object.keys(ev.res)).find((d) => ev.res[d]); } if (name === "register" && S.reg && S.reg.justDone) S.reg.justDone = false; }
+  if (["rankings", "athletes", "athlete", "search", "event"].includes(name)) loadFV();
   try { view.innerHTML = SCREENS[name](arg); } catch (err) { console.error(err); view.innerHTML = notFound(); }
   const ns = view.querySelector(".scroll"); if (ns) ns.scrollTop = top;
   if (!changed) view.querySelectorAll(".view-in").forEach((x) => x.classList.remove("view-in"));
@@ -2478,7 +2484,7 @@ const AR_RX = [
 AR_RX.push([/^Next: (.+)$/, (m, a) => `الجاية: ${T(a)}`]);
 function T(s) {
   if (Object.prototype.hasOwnProperty.call(AR, s)) return AR[s];
-  for (const [re, f] of AR_RX) { const m = s.match(re); if (m) return f(...m); }
+  for (const [re, f] of AR_RX) { const m = s.match(re); if (m) { const r = f(...m); if (r !== s) return r; } } // a rule that changes nothing lets the next one try
   if (s.includes(" · ")) { const p = s.split(" · "), q = p.map(T); if (q.some((x, i) => x !== p[i])) return q.join(" · "); }
   return s;
 }
@@ -2869,7 +2875,8 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
 })();
 /* athletes.json: full professional records (men) from the Fitness Volt database, written by scripts/fetch_athletes.py.
    athletes_ar.json: Arabic for athlete names, contest names and the words inside them. */
-(async () => {
+var fvLoading = null; // var + function: render() may call loadFV before this line runs
+function loadFV() { return fvLoading || (fvLoading = (async () => {
   if (!/^https?:$/.test(location.protocol)) return;
   try {
     const [r, ra] = await Promise.all([fetch("athletes.json", { cache: "no-cache" }), fetch("athletes_ar.json", { cache: "no-cache" }).catch(() => null)]);
@@ -2880,10 +2887,11 @@ const coverFor = (place) => (COVERS.find(([re]) => re.test(place)) || [0, "cv_ge
     j.athletes.forEach((x) => (x && Array.isArray(x.rows) ? x.rows : []).forEach((row) => { if (!Array.isArray(row)) return; const c = String(row[1]).replace(/^\d{4}\s+/, ""); const w = c.split(" ");
       if (!AR[c] && w.every((x) => /^\d+$/.test(x) || FV_WORDS[x])) AR[c] = w.map((x) => FV_WORDS[x] || x).join(" "); }));
     FVA = { updated: String(j.updated || ""), athletes: j.athletes }; PROS_ = null;
-    if (["rankings", "athletes", "athlete", "search", "event", "home"].includes(route()[0])) render(true);
+    if (FV_NEED.includes(route()[0])) render(true);
   } catch (e) {}
-})();
+})()); }
 const FV_WORDS = {}; // words inside contest names, from athletes_ar.json
+const FV_NEED = ["rankings", "athletes", "athlete", "search", "event"]; // screens that use athletes.json
 AR_RX.push([/^(\d+)(?:st|nd|rd|th)$/, (m, n) => `المركز ${n}`]);
 AR_RX.push([/^Masters (\d+)\+$/, (m, n) => `ماسترز فوق ${n}`]);
 Object.assign(AR, {
@@ -2915,7 +2923,8 @@ Object.assign(AR, {
   "Predictions are completely free: no entry fee, no betting and no cash prizes.": "التوقعات مجانية بالكامل: بدون رسوم دخول، ولا رهان، ولا جوائز مالية."
 });
 Object.assign(AR, {
-  "Athletes with results": "لاعبين عندهم نتايج", "Unplaced": "بدون مركز", "Full record · Fitness Volt": "السجل الكامل · Fitness Volt", "Wins:": "الانتصارات:", "Updated:": "آخر تحديث:",
+  "Athletes with results": "لاعبين عندهم نتايج", "Share": "مشاركة", "Link copied": "انتسخ الرابط", "BB365 Rankings": "تصنيف BB365",
+  "Reminders show inside the app, in Alerts. Phone notifications come later.": "التذكيرات تطلع داخل البرنامج في صفحة التنبيهات. تنبيهات التلفون نضيفها بعدين.", "Unplaced": "بدون مركز", "Full record · Fitness Volt": "السجل الكامل · Fitness Volt", "Wins:": "الانتصارات:", "Updated:": "آخر تحديث:",
   "Every professional contest counts, from each athlete’s first show until now.": "كل بطولات المحترفين محسوبة، من أول بطولة للاعب لين اليوم.",
   "Source: the Fitness Volt pro database, recorded from NPC Contests and the IFBB Pro League.": "المصدر: قاعدة بيانات Fitness Volt للمحترفين، ونتايجها من NPC Contests وIFBB Pro League.", "World level": "مستوى عالمي", "Kuwait No. 1": "الأول في الكويت", "Saudi No. 1": "الأول في السعودية", "Gulf No. 1": "الأول في الخليج", "World No. 1": "الأول عالمياً",
   "Tied at No. 1:": "متعادلين على المركز الأول:", "How the ranking works": "شلون ينحسب التصنيف", "Most first places come first, then second places, then third.": "اللي عنده مراكز أولى أكثر يكون فوق، بعدين المراكز الثانية، بعدين الثالثة.",

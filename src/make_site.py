@@ -6,6 +6,16 @@ head='''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Bodybuilding news, results, events and predictions for Kuwait and the Gulf.">
+<title>BB365 · كمال الأجسام في الكويت والخليج</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BB365">
+<meta property="og:title" content="BB365 · كمال الأجسام في الكويت والخليج">
+<meta property="og:description" content="نتائج، بطولات، تصنيف اللاعبين، أخبار وأدوات تمرين. Bodybuilding results, rankings and events for Kuwait and the Gulf.">
+<meta property="og:url" content="https://bb365app.github.io/bb365/">
+<meta property="og:image" content="https://bb365app.github.io/bb365/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#09090A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
