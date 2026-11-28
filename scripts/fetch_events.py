@@ -11,6 +11,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -132,14 +133,24 @@ def main():
     if len(sys.argv) > 1:
         page = Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
     else:
-        try:
-            req = urllib.request.Request(URL, headers={"User-Agent": "Mozilla/5.0 (BB365 events robot)"})
-            page = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
-        except Exception as err:
-            print("Could not read the official schedule:", err, "- events.json left unchanged.")
-            return
+        page = None
     today = datetime.now(timezone.utc).date()
-    events = [e for e in merge_same_place(parse(page)) if date.fromisoformat(e["end"]) >= today]
+    events = []
+    for attempt in range(3):  # the site sometimes sends a page without the tables; try again before giving up
+        if attempt:
+            time.sleep(20)
+        if len(sys.argv) <= 1:
+            try:
+                req = urllib.request.Request(URL, headers={"User-Agent": "Mozilla/5.0 (BB365 events robot)"})
+                page = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
+            except Exception as err:
+                print(f"Try {attempt + 1}: could not read the official schedule:", err)
+                continue
+        events = [e for e in merge_same_place(parse(page)) if date.fromisoformat(e["end"]) >= today]
+        if events or len(sys.argv) > 1:
+            break
+        title = re.search(r"<title[^>]*>(.*?)</title>", page, re.S | re.I)
+        print(f"Try {attempt + 1}: no men's tables in the page ({len(page)} characters, {page.count('tablepress')} tablepress mentions, title: {text(title.group(1)) if title else '-'})")
     if not events:
         print("No men's shows found on the page (layout may have changed). events.json left unchanged.")
         return
